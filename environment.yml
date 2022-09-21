@@ -23,7 +23,6 @@ dependencies:
   - seaborn=0.11.2
   - networkx=2.8.5
   - shap=0.41.0
-  - dgl=0.9.0
   - pip:
     - azure-identity==1.10.0 # >= 1.8.0 due to https://stackoverflow.com/a/72262694.
     - azure-keyvault-secrets==4.4.0
