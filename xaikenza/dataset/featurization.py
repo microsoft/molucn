@@ -151,6 +151,15 @@ def get_bond_features(bond, use_stereochemistry=True):
 
 
 def create_pytorch_geometric_data_list_from_smiles_and_labels(smiles, y_val):
+    """Converts a list of SMILES strings and a list of labels into a list of Pytorch Geometric Data objects.
+
+    Args:
+        smiles (str): SMILES of mol
+        y_val (float): activity value
+
+    Returns:
+        DataObject: molecule as Pytorch Geometric Data object
+    """
     # convert SMILES to PyG Data object
     mol = Chem.MolFromSmiles(smiles)
 

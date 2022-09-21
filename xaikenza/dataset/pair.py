@@ -3,9 +3,10 @@ import os
 import os.path as osp
 from collections.abc import Sequence
 from typing import Union
-import pandas as pd
+
 import dill
 import numpy as np
+import pandas as pd
 import torch
 import torch.utils.data
 from sklearn.model_selection import train_test_split
@@ -20,10 +21,27 @@ IndexType = Union[slice, Tensor, np.ndarray, Sequence]
 
 
 def get_num_features(hetero_data):
+    """Returns the number of node features and edge features in a HeteroData object.
+
+    Args:
+        hetero_data (HeteroData): 'HeteroData' object containing the data.
+
+    Returns:
+        int: Number of node features.
+        int: Number of edge features.
+    """
     return hetero_data["data_i"].x.shape[1], hetero_data["data_i"].edge_attr.shape[1]
 
 
 def convert_to_dicts(list_objects):
+    """Converts a list of objects to a list of dictionaries.
+
+    Args:
+        list_objects (List[]): List of objects.
+
+    Returns:
+        List of dicts
+    """
     list_dicts = []
     for obj in list_objects:
         list_dicts.append(obj.__dict__)
@@ -31,6 +49,14 @@ def convert_to_dicts(list_objects):
 
 
 def create_heterodata(input):
+    """Converts a pair of molecules with smiles, masks, activities, and mcs to a HeteroData object.
+
+    Args:
+        input (dict): Dictionary containing the data about a pair of compounds (smiles, masks, activities, mcs).
+
+    Returns:
+        HeteroData object
+    """
     hetero_data = HeteroData()
 
     data_i = create_pytorch_geometric_data_list_from_smiles_and_labels(
@@ -51,6 +77,13 @@ def create_heterodata(input):
 
 
 def rebalance_pairs(train_pairs, test_pairs, test_set_size=0.2):
+    """Rebalances the pairs in the training and test sets to a 0.8/0.2 ratio.
+
+    Args:
+        train_pairs (List of HeteroData): training pairs
+        test_pairs (List of HeteroData): testing pairs
+        test_set_size (float, optional): ratio of pairs in the test set. Defaults to 0.2.
+    """
     n = len(train_pairs) / (1 - test_set_size)
     if len(test_pairs) > test_set_size * n:
         test_pairs = test_pairs[: int(test_set_size * n)]
@@ -61,6 +94,18 @@ def rebalance_pairs(train_pairs, test_pairs, test_set_size=0.2):
 
 
 def train_test_split_pairs(pairs_list, ligands_list, test_set_size, seed=42):
+    """Split the ligands into training and test sets, construct training and test sets of pairs and rebalance them.
+
+    Args:
+        pairs_list (List of HeteroData): list of pairs of ligands
+        ligands_list (List of str): list of the individual ligands present in the pairs
+        test_set_size (float): Ratio of pairs in the test set
+        seed (int, optional): Defaults to 42.
+
+    Returns:
+        List of HeteroData: rebalanced training pairs
+        List of HeteroData: rebalanced test pairs
+    """
     train_ligands, test_ligands = train_test_split(
         ligands_list, random_state=seed, test_size=test_set_size
     )
@@ -78,6 +123,13 @@ def train_test_split_pairs(pairs_list, ligands_list, test_set_size, seed=42):
 
 
 def create_ligands_list(pairs_list):
+    """Creates a list of ligands present in the pairs.
+
+    Args:
+        pairs_list (List of HeteroData): list of pairs of ligands
+    Returns:
+        List of str: list of ligand smiles
+    """
     ligands_list = []
     for pair in pairs_list:
         ligands_list.append(pair["data_i"].smiles)
@@ -86,6 +138,14 @@ def create_ligands_list(pairs_list):
 
 
 def get_list_targets(data_ori_path="data/selected_processed_data"):
+    """Returns the list of targets present in the dataset.
+
+    Args:
+        data_ori_path (str, optional): directory with the processed data of protein targets. Defaults to "data/selected_processed_data".
+
+    Returns:
+        List of str: list of targets present in the processed data folder
+    """
     LIST_TARGETS = []
     for folder in os.listdir(data_ori_path):
         LIST_TARGETS.append(folder[:8])
@@ -122,7 +182,7 @@ if __name__ == "__main__":
         train_pairs, test_pairs = train_test_split_pairs(
             pairs_list, ligands_list, test_set_size=args.test_set_size, seed=args.seed
         )
-        
+
         # Ligands in testing set are NOT in training set!
         if len(train_pairs) > 50:
             with open(
@@ -150,7 +210,10 @@ if __name__ == "__main__":
                     "n_pairs_test": [n_pairs_test],
                 }
             )
-            df_stats.to_csv(osp.join(dir_target, f"{target}_seed_{args.seed}_stats.csv"), index=False)
+            df_stats.to_csv(
+                osp.join(dir_target, f"{target}_seed_{args.seed}_stats.csv"),
+                index=False,
+            )
 
             with open(
                 osp.join(dir_target, f"{target}_seed_{args.seed}_info.txt"), "w"

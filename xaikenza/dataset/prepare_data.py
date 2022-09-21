@@ -14,11 +14,13 @@ SYMBOL_EXCLUDE = set(["=", ">", "<"])
 
 
 def convert_to_mask(dict):
+    """Converts a dictionary of atom indices to a mask."""
     arr = np.array(list(dict.values()))
     return arr
 
 
 def ensure_readability(strings, read_f):
+    """Ensures that all strings can be read by a given function."""
     valid_idx = []
     for idx, string in enumerate(strings):
         mol = read_f(string)
@@ -28,6 +30,7 @@ def ensure_readability(strings, read_f):
 
 
 def translate(strings_, fromfun, tofun):
+    """Translat a list of strings from one format to another."""
     trans = []
     idx_success = []
     for idx, s in enumerate(strings_):
@@ -49,6 +52,9 @@ def process_tsv(
     min_p_diff=MIN_P_DIFF,
     mw_thr=MW_THR,
 ):
+
+    """Extracts the SMILES and activities from a TSV file."""
+
     df = pd.read_csv(tsv_file, sep="\t")
     df = df.loc[df[affcol].notna()]
 
@@ -94,6 +100,10 @@ def process_tsv(
 
 
 def gen_data(tsv_file, pairs_file, colors_file):
+    """Generates the data for the dataset. 
+    Extract smiles and activities from the TSV file, 
+    the pairs from the pairs file 
+    and the masks from the colors file."""
     df_pairs = pd.read_csv(pairs_file)
     colors = pd.read_pickle(colors_file)
     df_activities = process_tsv(tsv_file)
@@ -112,13 +122,16 @@ def gen_data(tsv_file, pairs_file, colors_file):
 
             mask_i = convert_to_mask(colors[k][0][0]).tolist()
             mask_j = convert_to_mask(colors[k][0][1]).tolist()
-            
+
             mcs = np.ones(10)
             for p in range(10):
                 if colors[k][p] is None:
                     mcs[p] = 0
-            
-            if len(np.where(np.array(mask_i)==0)[0]) > 0 and len(np.where(np.array(mask_j)==0)[0]) > 0:
+
+            if (
+                len(np.where(np.array(mask_i) == 0)[0]) > 0
+                and len(np.where(np.array(mask_j) == 0)[0]) > 0
+            ):
                 new_row = {
                     "smiles_i": smiles_i,
                     "smiles_j": smiles_j,
@@ -126,7 +139,7 @@ def gen_data(tsv_file, pairs_file, colors_file):
                     "a_j": a_j,
                     "mask_i": mask_i,
                     "mask_j": mask_j,
-                    "mcs" : mcs.tolist()
+                    "mcs": mcs.tolist(),
                 }
                 pairs_list.append(new_row)
     return pairs_list
@@ -149,14 +162,16 @@ if __name__ == "__main__":
             and os.path.exists(pairs_file)
             and os.path.exists(colors_file)
         ):
-            print('Processing folder {}'.format(folder))
+            print("Processing folder {}".format(folder))
             pairs_list = gen_data(tsv_file, pairs_file, colors_file)
             n_pairs = len(pairs_list)
-            file_name = f'{folder}_processed_data_{n_pairs}.json'
+            file_name = f"{folder}_processed_data_{n_pairs}.json"
             dir_data_save = os.path.join("xaibench/processed_data", file_name)
             with open(dir_data_save, "w") as fp:
                 for pair in pairs_list:
                     fp.write(json.dumps(pair))
                     fp.write("\n")
-                    
-            shutil.copy(dir_data_save, os.path.join("data/selected_processed_data", file_name))
+
+            shutil.copy(
+                dir_data_save, os.path.join("data/selected_processed_data", file_name)
+            )
