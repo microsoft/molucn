@@ -144,3 +144,6 @@ figures/
 *.json
 *.txt
 
+# Amlt
+.amltignore
+.amltconfig

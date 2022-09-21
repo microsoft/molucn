@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LIST_TARGETS=`cat list_targets_3.txt`;
+LIST_TARGETS=`cat list_targets_350.txt`;
 
 echo $LIST_TARGETS;
 echo "pool: $1";
