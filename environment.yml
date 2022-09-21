@@ -1,0 +1,39 @@
+name: xaienv
+channels:
+  - pyg
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - cudatoolkit=11.3
+  - pip=22.2.2 # See https://github.com/Azure/MachineLearningNotebooks/issues/1110 - using this specific pip works around ruamel.yaml not found error.
+  - pyg=2.0.4
+  - pytest=7.1.2
+  - python=3.8.13
+  - pytorch-sparse=0.6.13
+  - pytorch=1.11
+  - pytorch-lightning==1.6.3
+  - typing-extensions=4.2.0
+  - einops=0.4.1
+  - rdkit=2022.03.4
+  - jupyter=1.0.0
+  - dill=0.3.5.1
+  - tensorboard=2.6.0
+  - wandb=0.12.21
+  - seaborn=0.11.2
+  - networkx=2.8.5
+  - shap=0.41.0
+  - dgl=0.9.0
+  - pip:
+    - azure-identity==1.10.0 # >= 1.8.0 due to https://stackoverflow.com/a/72262694.
+    - azure-keyvault-secrets==4.4.0
+    - azure-mgmt-storage==19.1.0
+    - azure-mgmt-resource==19.0.0
+    - azure-mgmt-subscription==3.0.0
+    - azure-storage-blob==12.12.0
+    - azure-mgmt-core==1.3.0
+    - msrestazure==0.6.4
+    - cached-property==1.5.2
+    - dacite==1.6.0
+    - hydra-core==1.2.0
+    - jsonargparse[signatures]==4.9.00
