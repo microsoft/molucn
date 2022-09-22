@@ -1,29 +1,32 @@
-import numpy as np
+from typing import List, Tuple
 
+import numpy as np
 from sklearn.metrics import f1_score
+from torch_geometric.data import HeteroData
 
 f_score = lambda x, y: f1_score(x, y, zero_division=1)
 
 EPS_ZERO = 1e-8
 
 
-def get_imp_uncommon(mask, color_pred):
-    assert len(color_pred) == len(mask)
-    idx_noncommon = np.where(mask != 0)[0]
-    if len(idx_noncommon) == 0:
-        return 0
-    color_pred_noncommon = np.array(
-        [color_pred[idx] for idx in idx_noncommon]
-    ).flatten()
-    return np.mean(color_pred_noncommon)
-
-
 def aggregated_color_direction(
-    color_pred_i, color_pred_j, color_true_i, color_true_j, diff
-):
-    """
-    Checks whether the average assigned colors to a substructural
-    change matches the sign of the experimental difference
+    color_pred_i: List[float],
+    color_pred_j: List[float],
+    color_true_i: List[float],
+    color_true_j: List[float],
+    diff: float,
+) -> float:
+    """Checks whether the average assigned colors to a substructural change matches the sign of the experimental difference.
+
+    Args:
+        color_pred_i (List[float]): the color assigned to the first molecule by the feature attribution method
+        color_pred_j (List[float]): the color assigned to the second molecule by the feature attribution method
+        color_true_i (List[float]): the true coloring of the first molecule
+        color_true_j (List[float]): the true coloring of the second molecule
+        diff (float):the difference in activity between the two molecules
+
+    Returns:
+        float: the global direction score for the pair of molecules
     """
     assert len(color_true_i) == len(color_pred_i)
     assert len(color_true_j) == len(color_pred_j)
@@ -59,7 +62,10 @@ def aggregated_color_direction(
     return score
 
 
-def get_global_directions(pairs_list, colors, set="train"):
+def get_global_directions(
+    pairs_list: List[HeteroData], colors: Tuple[List[float]], set: str = "train"
+) -> np.ndarray:
+    """Computes the global direction scores for all the pairs in the dataset."""
     accs = []
     for k in range(len(pairs_list)):
         hetero_data = pairs_list[k]
@@ -72,6 +78,6 @@ def get_global_directions(pairs_list, colors, set="train"):
         acc = aggregated_color_direction(
             color_pred_i, color_pred_j, mask_i, mask_j, diff
         )
-        mcs_accs = np.where(mcs!=0,mcs,np.nan)*acc
+        mcs_accs = np.where(mcs != 0, mcs, np.nan) * acc
         accs.append(mcs_accs)
     return np.array(accs)

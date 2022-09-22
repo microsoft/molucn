@@ -1,7 +1,9 @@
+# Code adapted from tensorflow to pytorch from https://github.com/google-research/graph-attribution/tree/main/graph_attribution
 from copy import deepcopy
 import torch
 import networkx as nx
 from feat_attribution.explainer_base import Explainer
+from torch_geometric.data import Data
 
 def gen_steps(graph, n_steps: int, version=2):
     """
@@ -30,7 +32,7 @@ class IntegratedGradient(Explainer):
         super(IntegratedGradient, self).__init__(device, model)
         self.device = device
 
-    def explain_graph(self, graph, model=None, n_steps=50, version=2, feature_scale=True):
+    def explain_graph(self, graph: Data, model: torch.nn.Module =None, n_steps: int = 50, version: int = 2, feature_scale: bool = True) -> torch.Tensor:
         
         """Computes path integral of the node features of `graph` for a
         specific `task` number, using a Monte Carlo approx. of `n_steps`. 

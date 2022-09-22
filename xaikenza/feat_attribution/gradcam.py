@@ -1,7 +1,8 @@
+# Code adapted from tensorflow to pytorch from https://github.com/google-research/graph-attribution/tree/main/graph_attribution
+
 import torch
 from feat_attribution.explainer_base import Explainer
-import numpy as np
-
+from torch_geometric.data import Data
 
 class GradCAM(Explainer):
     """GradCAM: intermediate activations and gradients as input importance.
@@ -31,7 +32,7 @@ class GradCAM(Explainer):
         self.device = device
         self.last_layer_only = last_layer_only
 
-    def explain_graph(self, graph, model=None):
+    def explain_graph(self, graph: Data, model: torch.nn.Module =None) -> torch.Tensor:
 
         if model == None:
             model = self.model

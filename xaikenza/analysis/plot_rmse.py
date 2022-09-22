@@ -13,19 +13,21 @@ from plot_utils import get_stats
 
 sns.set_theme(style="whitegrid")
 
-mpl.rcParams["figure.facecolor"] = "white"
+matplotlib.rcParams["figure.facecolor"] = "white"
 
-par_dir = "/home/t-kenzaamara/internship2022"
-import shutil
-
+par_dir = "/home/t-kenzaamara/molucn"
+from collections import Counter
 import scipy.stats as stats
-
-par_dir = "/home/t-kenzaamara/internship2022/"
-
+import pandas as pd
 # %%
 model_res = pd.read_csv(osp.join(par_dir, f"logs/mcs_model_scores_350.csv"))
 model_res.loc[model_res['explainer'] =='rf', 'loss'] = 'RF'
-model_res.columns
+model_res = model_res[model_res['explainer'] !='shap']
+#%% 
+status = dict(Counter(model_res.target))
+model_res["status"] = model_res["target"].map(status)
+attr_res = model_res[model_res.status==max(model_res['status'])]
+print(len(model_res['target'].unique()))
 ##### STATISTICS - SIGNIFICANTLY DIFFERENT? - p-value ######
 ###############################################################################
 

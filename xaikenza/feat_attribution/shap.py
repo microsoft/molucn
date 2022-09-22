@@ -1,5 +1,7 @@
+# Code adapted from tensorflow to pytorch from https://github.com/google-research/graph-attribution/tree/main/graph_attribution
 import numpy as np
 from xaikenza.feat_attribution.explainer_base import Explainer
+from torch_geometric.data import Data
 from copy import deepcopy
 import numpy as np
 import scipy.special

@@ -8,13 +8,13 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 print(os.getcwd())
 import sys
-sys.path.append('/home/t-kenzaamara/internship2022/')
+sys.path.append('/home/t-kenzaamara/molucn/')
 from xaikenza.utils.utils import read_list_targets
-par_dir = '/home/t-kenzaamara/internship2022/'
+par_dir = '/home/t-kenzaamara/molucn/'
 
 def read_list_targets(n_targets):
     list_targets = []
-    list_file = '/home/t-kenzaamara/internship2022/list_targets_{}.txt'.format(n_targets)
+    list_file = '/home/t-kenzaamara/molucn/list_targets_{}.txt'.format(n_targets)
     if os.path.exists(list_file):
         with open(list_file, 'r') as f:
             lines = f.readlines()
@@ -26,10 +26,10 @@ def get_stats(n_targets):
     list = read_list_targets(n_targets)
     df_stats = pd.DataFrame(columns=['n_compounds', 'n_pairs_init', 'n_pairs', 'n_pairs_train', 'n_pairs_test'])
     targets = []
-    for folder in os.listdir('/home/t-kenzaamara/internship2022/data'):
+    for folder in os.listdir('/home/t-kenzaamara/molucn/data'):
         print(folder in list)
         if len(folder)==8 and (folder in list):
-            folder_path = os.path.join('/home/t-kenzaamara/internship2022/data', folder)
+            folder_path = os.path.join('/home/t-kenzaamara/molucn/data', folder)
             if os.path.isdir(folder_path):
                 for file in os.listdir(folder_path):
                     if file.endswith('stats.csv'):

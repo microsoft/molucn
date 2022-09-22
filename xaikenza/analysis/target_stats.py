@@ -10,10 +10,9 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 print(os.getcwd())
 import sys
-sys.path.append('/home/t-kenzaamara/internship2022/')
-from xaikenza.utils.utils import read_list_targets
+sys.path.append('/home/t-kenzaamara/molucn/')
 
-par_dir = '/home/t-kenzaamara/internship2022/'
+par_dir = '/home/t-kenzaamara/molucn/'
 pal = sns.color_palette("tab10")
 # %%
 
@@ -24,7 +23,13 @@ sns.set_style("whitegrid")
 
 # %%         
 df_stats_350 = get_stats(350).reset_index()  
-df_stats_350 = df_stats_350.drop_duplicates('target')            
+df_stats_350 = df_stats_350.drop_duplicates('target')   
+
+# %% 
+large_targets = df_stats_350.sort_values(by='n_pairs', ascending=False)[:15]
+large_targets.target.tolist()
+
+# %%          
 attr_res = pd.read_csv(os.path.join(par_dir, f"results/mcs_attr_scores_350.csv"))
 model_scores = pd.read_csv(os.path.join(par_dir, f"logs/mcs_model_scores_350.csv"))
 

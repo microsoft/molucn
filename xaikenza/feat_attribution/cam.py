@@ -1,6 +1,8 @@
+# Code adapted from tensorflow to pytorch from https://github.com/google-research/graph-attribution/tree/main/graph_attribution
+
 import torch
 from feat_attribution.explainer_base import Explainer
-
+from torch_geometric.data import Data
 
 class CAM(Explainer):
     """CAM: Decompose output as a linear sum of nodes and edges.
@@ -15,11 +17,11 @@ class CAM(Explainer):
     (https://arxiv.org/abs/1512.04150).
     """
 
-    def __init__(self, device, model):
+    def __init__(self, device: torch.device, model: torch.nn.Module):
         super(CAM, self).__init__(device, model)
         self.device = device
 
-    def explain_graph(self, graph, model=None):
+    def explain_graph(self, graph: Data, model: torch.nn.Module =None) -> torch.Tensor:
 
         if model == None:
             model = self.model

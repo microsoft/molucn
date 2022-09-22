@@ -1,3 +1,4 @@
+# Code adapted from tensorflow to pytorch from https://github.com/google-research/graph-attribution/tree/main/graph_attribution
 import torch
 from torch.autograd import Variable
 
@@ -9,7 +10,7 @@ class GradInput(Explainer):
         super(GradInput, self).__init__(device, model)
         self.device = device
 
-    def explain_graph(self, graph, model=None):
+    def explain_graph(self, graph: Data, model: torch.nn.Module =None) -> torch.Tensor:
 
         if model == None:
             model = self.model

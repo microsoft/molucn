@@ -1,7 +1,10 @@
+# Code adapted from https://github.com/Wuyxin/ReFine
+
 import math
 
 import numpy as np
 import torch
+from torch_geometric.data import Data
 
 EPS = 1e-6
 

@@ -2,19 +2,17 @@
 import os
 import os.path as osp
 import matplotlib
-matplotlib.use('agg')
+# matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import pandas as pd
-import numpy as np
 import seaborn as sns
-import scipy.stats as stats
-import shutil
+from collections import Counter
 
 sns.set_theme(style="whitegrid")
 
 matplotlib.rcParams["figure.facecolor"] = "white"
 
-par_dir = "/home/t-kenzaamara/internship2022"
+par_dir = "/home/t-kenzaamara/molucn"
 
 
 # Option: plot scores vs mcs
@@ -32,13 +30,17 @@ model_res = pd.read_csv(osp.join(par_dir, f"logs/mcs_model_scores_350.csv"))
 attr_res = pd.read_csv(osp.join(par_dir, f"results/mcs_attr_scores_350.csv"))
 attr_res =attr_res.sort_values(by=['explainer','pool', 'loss'], ascending=[False, False, True])
 attr_res.loc[attr_res['explainer'] =='rf', 'loss'] = 'RF'
-
-
+attr_res = attr_res[attr_res['explainer'] !='shap']
+#%% 
+status = dict(Counter(attr_res.target))
+attr_res["status"] = attr_res["target"].map(status)
+attr_res = attr_res[attr_res.status==max(attr_res['status'])]
+print(len(attr_res['target'].unique()))
 # %% 
 pal = sns.color_palette("tab10")
 dict_color = {"gradinput":pal[0], "ig":pal[1], "cam":pal[2], "gradcam": pal[3], "diff": pal[4], "shap": pal[5], "rf":"black"}
 leg_labels = {"gradinput":"GradInput", "ig":"IntegratedGrads", "cam":"CAM", "gradcam": "Grad-CAM", "diff": "Masking (GNN)", "shap": "SHAP", "rf":"Masking (RF)"}
-order_items = {"rf":0, "diff": 1, "gradinput":2, "ig":3, "cam":4, "gradcam":5, "shap":6}
+order_items = {"rf":0, "diff": 1, "gradinput":2, "ig":3, "cam":4, "gradcam":5}#, "shap":6}
 attr_res['order'] = attr_res['explainer'].apply(lambda x: order_items[x])
 attr_res = attr_res.sort_values(by='order')
 attr_res['acc_test_%'] = attr_res['acc_test'].apply(lambda x: x*100)
@@ -109,7 +111,7 @@ axs[2].set(xlabel=None)
 legend = plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', handlelength=1, frameon=False, borderaxespad=0, title='Feature Attribution')
 for t in legend.get_texts():
     t.set_text(leg_labels[t.get_text()])
-for i in range(7):
+for i in range(len(order_items.keys())):
     legend.get_lines()[i].set_linewidth(6)
 
 fig.text(0.45, -0.04, "Minimum shared MCS atoms among pairs (%)", ha='center', fontsize=22)
@@ -176,7 +178,7 @@ axs[2].set(xlabel=None)
 legend = plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', handlelength=1, frameon=False, borderaxespad=0, title='Feature Attribution')
 for t in legend.get_texts():
     t.set_text(leg_labels[t.get_text()])
-for i in range(7):
+for i in range(len(order_items.keys())):
     legend.get_lines()[i].set_linewidth(6)
 
 fig.text(0.45, -0.04, "Minimum shared MCS atoms among pairs (%)", ha='center', fontsize=22)
@@ -249,7 +251,7 @@ axs[2].set(xlabel=None)
 legend = plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', handlelength=1, frameon=False, borderaxespad=0, title='Feature Attribution')
 for t in legend.get_texts():
     t.set_text(leg_labels[t.get_text()])
-for i in range(7):
+for i in range(len(order_items.keys())):
     legend.get_lines()[i].set_linewidth(6)
 
 #plt.xlabel("Minimum shared MCS atoms among pairs (%)")
@@ -318,7 +320,7 @@ axs[2].set(xlabel=None)
 legend = plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', handlelength=1, frameon=False, borderaxespad=0, title='Feature Attribution')
 for t in legend.get_texts():
     t.set_text(leg_labels[t.get_text()])
-for i in range(7):
+for i in range(len(order_items.keys())):
     legend.get_lines()[i].set_linewidth(6)
 
 fig.text(0.45, -0.04, "Minimum shared MCS atoms among pairs (%)", ha='center', fontsize=22)

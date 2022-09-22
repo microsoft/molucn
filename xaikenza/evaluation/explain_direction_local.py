@@ -1,19 +1,14 @@
-import os
 from typing import List, Tuple
+
 import numpy as np
-from xaikenza.utils.utils import (
-    get_common_nodes,
-    get_positions,
-    get_substituents,
-)
-
-os.environ["WANDB_SILENT"] = "true"
-
+from torch.geometric import HeteroData
+from xaikenza.utils.utils import get_common_nodes, get_positions, get_substituents
 
 EPS_ZERO = 1e-8
 
 
 def get_imp_substituent(site, subs, pos_sub, color_pred):
+    """Returns the importance of the substituent at the given site."""
     if pos_sub[site] == -1:
         return 0
     sub = subs[pos_sub[site]]
@@ -22,18 +17,32 @@ def get_imp_substituent(site, subs, pos_sub, color_pred):
 
 
 def attr_local_acc(
-    color_pred_i,
-    color_pred_j,
-    subs_i,
-    subs_j,
-    pos_sub_i,
-    pos_sub_j,
-    a_i,
-    a_j,
-    cmn_sites,
-):
-    """
-    Checks agreement between sign of sub attribution and activity cliff.
+    color_pred_i: List[float],
+    color_pred_j: List[float],
+    subs_i: List[List[int]],
+    subs_j: List[List[int]],
+    pos_sub_i: List[int],
+    pos_sub_j: List[int],
+    a_i: float,
+    a_j: float,
+    cmn_sites: List[int],
+) -> List[float]:
+
+    """Checks agreement between sign of sub attribution and activity cliff.
+
+    Args:
+        color_pred_i (List[float]): the color assigned to the first molecule by the feature attribution method
+        color_pred_j (List[float]): the color assigned to the second molecule by the feature attribution method
+        subs_i (List[List[int]]): the list of substituents of the first molecule
+        subs_j (List[List[int]]): the list of substituents of the second molecule
+        pos_sub_i (List[int]): the position of the substituent of the first molecule
+        pos_sub_j (List[int]): the position of the substituent of the second molecule
+        a_i (float): the activity of the first molecule
+        a_j (float): the activity of the second molecule
+        cmn_sites (List[int]): the list of common sites between the two molecules
+
+    Returns:
+        float: the local direction scores for each substituent at each site in the common sites
     """
     local_accs = []
     for site in cmn_sites:
@@ -49,17 +58,10 @@ def attr_local_acc(
     return local_accs
 
 
-def get_local_directions(pairs_list: List[HeteroData], colors, set="train") -> Tuple:
-    """_summary_
-
-    Args:
-        pairs_list (List[HeteroData]): _description_
-        colors (_type_): _description_
-        set (str, optional): _description_. Defaults to "train".
-
-    Returns:
-        Tuple: _description_
-    """
+def get_local_directions(
+    pairs_list: List[HeteroData], colors: Tuple[List[float]], set="train"
+) -> List[float]:
+    """Computes the local direction scores for all the pairs in the dataset."""
     accs = []
     n_skip = 0
     for k in range(len(pairs_list)):
@@ -69,8 +71,6 @@ def get_local_directions(pairs_list: List[HeteroData], colors, set="train") -> T
         color_pred_i, color_pred_j = colors[k]
         mask_i, mask_j = data_i.mask, data_j.mask
         if len(np.where(mask_i == 0)[0]) == 0 or len(np.where(mask_j == 0)[0]) == 0:
-            # print('mask i, mask j:', mask_i, mask_j)
-            # print('data i, data j:', data_i.smiles, data_j.smiles)
             print("No common nodes or weird coloring.")
             n_skip += 1
             continue
@@ -85,7 +85,6 @@ def get_local_directions(pairs_list: List[HeteroData], colors, set="train") -> T
         pos_sub_j = get_positions(subs_j, idx_common_j, map_j)
 
         cmn_sites = np.unique(np.concatenate([as_i, as_j]))
-        # print('cmn_sites', cmn_sites)
         local_accs = attr_local_acc(
             color_pred_i,
             color_pred_j,
@@ -98,8 +97,6 @@ def get_local_directions(pairs_list: List[HeteroData], colors, set="train") -> T
             cmn_sites,
         )
         for local_acc in local_accs:
-            res = np.where(mcs!=0,mcs,np.nan)*local_acc
+            res = np.where(mcs != 0, mcs, np.nan) * local_acc
             accs.append(res)
-    # print("Number of skipped examples:", n_skip)
     return accs
-
