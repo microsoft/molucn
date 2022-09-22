@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+from typing import Callable, List, Tuple
 
 import numpy as np
 import pandas as pd
@@ -13,13 +14,13 @@ MIN_P_DIFF = 1.0
 SYMBOL_EXCLUDE = set(["=", ">", "<"])
 
 
-def convert_to_mask(dict):
+def convert_to_mask(dict: dict) -> np.ndarray:
     """Converts a dictionary of atom indices to a mask."""
     arr = np.array(list(dict.values()))
     return arr
 
 
-def ensure_readability(strings, read_f):
+def ensure_readability(strings: List[str], read_f: Callable) -> List[int]:
     """Ensures that all strings can be read by a given function."""
     valid_idx = []
     for idx, string in enumerate(strings):
@@ -29,7 +30,9 @@ def ensure_readability(strings, read_f):
     return valid_idx
 
 
-def translate(strings_, fromfun, tofun):
+def translate(
+    strings_: List[str], fromfun: Callable, tofun: Callable
+) -> Tuple[List[str], List[int]]:
     """Translat a list of strings from one format to another."""
     trans = []
     idx_success = []
@@ -45,13 +48,13 @@ def translate(strings_, fromfun, tofun):
 
 
 def process_tsv(
-    tsv_file,
+    tsv_file: str,
     ligcol="Ligand SMILES",
     affcol="IC50 (nM)",
     use_log=True,
     min_p_diff=MIN_P_DIFF,
     mw_thr=MW_THR,
-):
+) -> pd.DataFrame:
 
     """Extracts the SMILES and activities from a TSV file."""
 
@@ -99,10 +102,10 @@ def process_tsv(
     return df
 
 
-def gen_data(tsv_file, pairs_file, colors_file):
-    """Generates the data for the dataset. 
-    Extract smiles and activities from the TSV file, 
-    the pairs from the pairs file 
+def gen_data(tsv_file: str, pairs_file: str, colors_file: str) -> List[dict]:
+    """Generates the data for the dataset.
+    Extract smiles and activities from the TSV file,
+    the pairs from the pairs file
     and the masks from the colors file."""
     df_pairs = pd.read_csv(pairs_file)
     colors = pd.read_pickle(colors_file)

@@ -8,6 +8,7 @@ import torch
 
 # RDkit
 from rdkit import Chem
+from Chem.rdchem import Atom, Bond
 from rdkit.Chem.rdmolops import GetAdjacencyMatrix
 from torch_geometric.data import Data
 
@@ -29,7 +30,7 @@ def one_hot_encoding(x, permitted_list):
     return binary_encoding
 
 
-def get_atom_features(atom, use_chirality=True, hydrogens_implicit=True):
+def get_atom_features(atom: Atom, use_chirality=True, hydrogens_implicit=True):
     """
     Takes an RDKit atom object as input and gives a 1d-numpy array of atom features as output.
     """
@@ -121,7 +122,7 @@ def get_atom_features(atom, use_chirality=True, hydrogens_implicit=True):
     return np.array(atom_feature_vector)
 
 
-def get_bond_features(bond, use_stereochemistry=True):
+def get_bond_features(bond: Bond, use_stereochemistry=True):
     """
     Takes an RDKit bond object as input and gives a 1d-numpy array of bond features as output.
     """
@@ -150,7 +151,9 @@ def get_bond_features(bond, use_stereochemistry=True):
     return np.array(bond_feature_vector)
 
 
-def create_pytorch_geometric_data_list_from_smiles_and_labels(smiles, y_val):
+def create_pytorch_geometric_data_list_from_smiles_and_labels(
+    smiles: str, y_val: float
+) -> Data:
     """Converts a list of SMILES strings and a list of labels into a list of Pytorch Geometric Data objects.
 
     Args:
@@ -158,7 +161,7 @@ def create_pytorch_geometric_data_list_from_smiles_and_labels(smiles, y_val):
         y_val (float): activity value
 
     Returns:
-        DataObject: molecule as Pytorch Geometric Data object
+        Data: molecule as Pytorch Geometric Data object
     """
     # convert SMILES to PyG Data object
     mol = Chem.MolFromSmiles(smiles)

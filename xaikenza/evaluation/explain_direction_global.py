@@ -1,47 +1,10 @@
-import json
-import os
-import os.path as osp
-import sys
-import time
-
-import dill
 import numpy as np
-import pandas as pd
-import torch
 
-from xaikenza.dataset.pair import get_num_features
-from xaikenza.feat_attribution.gradinput import GradInput
-from xaikenza.gnn.model import GNN
-from xaikenza.utils.parser_utils import overall_parser
-from xaikenza.utils.train_utils import DEVICE
-from xaikenza.utils.utils import avg, set_seed, std
-
-os.environ["WANDB_SILENT"] = "true"
-
-from sklearn.metrics import accuracy_score, f1_score
+from sklearn.metrics import f1_score
 
 f_score = lambda x, y: f1_score(x, y, zero_division=1)
 
 EPS_ZERO = 1e-8
-
-
-def color_agreement(color_true, color_pred, metric_f):
-    """
-    Checks agreement between true and predicted colors.
-    """
-    assert len(color_true) == len(color_pred)
-    idx_noncommon = np.where(color_true != 0)[0]
-    if len(idx_noncommon) == 0:
-        return -1.0
-    color_true_noncommon = np.array([color_true[idx] for idx in idx_noncommon])
-    color_pred_noncommon = np.array(
-        [color_pred[idx] for idx in idx_noncommon]
-    ).flatten()
-    color_pred_noncommon[color_pred_noncommon == 0] += np.random.uniform(
-        low=-EPS_ZERO, high=EPS_ZERO, size=np.sum(color_pred_noncommon == 0)
-    )  # fix: assign small random value to exactly zero-signed preds.
-    color_pred_noncommon = np.sign(color_pred_noncommon)
-    return metric_f(color_true_noncommon, color_pred_noncommon)
 
 
 def get_imp_uncommon(mask, color_pred):

@@ -1,14 +1,15 @@
-import os
+from typing import Callable, Iterable, List, Tuple
 
 import numpy as np
 from sklearn.metrics import accuracy_score, f1_score
+from torch_geometric.data import HeteroData
 
 f_score = lambda x, y: f1_score(x, y, zero_division=1)
 
 EPS_ZERO = 1e-8
 
 
-def color_agreement(color_true, color_pred, metric_f):
+def color_agreement(color_true: List[int], color_pred: List[float], metric_f: Callable):
     """
     Checks agreement between true and predicted colors.
     """
@@ -27,17 +28,19 @@ def color_agreement(color_true, color_pred, metric_f):
     return metric_f(color_true_noncommon, color_pred_noncommon)
 
 
-def get_scores(pairs_list, colors, set="train"):
+def get_scores(
+    pairs_list: List[HeteroData], colors: List[Tuple[List[float]]], set="train"
+) -> Tuple[Iterable[float], Iterable[float]]:
     """Computes the accuracy and F1 color agreement scores of the atom color predictions for a given set of pairs for each MCS value.
 
     Args:
-        pairs_list (List of HeteroData): list of pairs colored by the model
-        colors (List of Pairs of Lists of float values): node importance scores for each pair predicted by the feature attribution method
+        pairs_list (List[HeteroData]): list of pairs colored by the model
+        colors (List[Tuple[List[float]]]): node importance scores for each pair predicted by the feature attribution method
         set (str, optional): Defaults to "train".
 
     Returns:
-        List: list of accuracy scores for each target at each MCS threshold. Size (N_targets, N_MCS_thresh)
-        List: list of F1 scores for each target at each MCS threshold. Size (N_targets, N_MCS_thresh)
+        Iterable[float]: numpy array of accuracy scores for each target at each MCS threshold. Size (N_targets, N_MCS_thresh)
+        Iterable[float]: numpy array of F1 scores for each target at each MCS threshold. Size (N_targets, N_MCS_thresh)
     """
     accs, f1s = [], []
     for k in range(len(pairs_list)):

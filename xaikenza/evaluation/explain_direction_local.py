@@ -1,24 +1,10 @@
-import json
 import os
-import os.path as osp
-import sys
-import time
-
-import dill
+from typing import List, Tuple
 import numpy as np
-import pandas as pd
-import torch
-
-from xaikenza.dataset.pair import get_num_features
-from xaikenza.feat_attribution.gradinput import GradInput
-from xaikenza.gnn.model import GNN
-from xaikenza.utils.parser_utils import overall_parser
-from xaikenza.utils.train_utils import DEVICE
 from xaikenza.utils.utils import (
     get_common_nodes,
     get_positions,
     get_substituents,
-    set_seed,
 )
 
 os.environ["WANDB_SILENT"] = "true"
@@ -63,7 +49,17 @@ def attr_local_acc(
     return local_accs
 
 
-def get_local_directions(pairs_list, colors, set="train"):
+def get_local_directions(pairs_list: List[HeteroData], colors, set="train") -> Tuple:
+    """_summary_
+
+    Args:
+        pairs_list (List[HeteroData]): _description_
+        colors (_type_): _description_
+        set (str, optional): _description_. Defaults to "train".
+
+    Returns:
+        Tuple: _description_
+    """
     accs = []
     n_skip = 0
     for k in range(len(pairs_list)):

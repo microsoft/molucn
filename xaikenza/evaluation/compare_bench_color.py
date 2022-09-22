@@ -3,6 +3,7 @@
 import json
 import os
 import os.path as osp
+from typing import List
 
 import numpy as np
 import pandas as pd
@@ -11,13 +12,13 @@ from xaikenza.utils.parser_utils import overall_parser
 NO_VALUES_AT = [28, 269, 346, 600, 608, 655]
 
 
-def clean_score(score, selected_idx):
+def clean_score(score: List[float], selected_idx: List[int]) -> List[float]:
     """Filters out the scores that are in forbidden NO_VALUES_AT list and that are not in the selected indices."""
     score_bench = np.delete(score, NO_VALUES_AT)
     return score_bench[selected_idx]
 
 
-def create_mapping(path="xaibench/benchmark"):
+def create_mapping(path="xaibench/benchmark") -> dict:
     """Maps targets to unique indices."""
     mapping = dict()
     k = 0
@@ -27,7 +28,7 @@ def create_mapping(path="xaibench/benchmark"):
     return mapping
 
 
-def get_selected_indices(mapping, list_targets):
+def get_selected_indices(mapping: dict, list_targets: List[str]) -> List[int]:
     """Select the indici of the targets in the list."""
     selected_idx = []
     for target in list_targets:

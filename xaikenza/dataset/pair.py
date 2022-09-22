@@ -2,7 +2,7 @@ import ast
 import os
 import os.path as osp
 from collections.abc import Sequence
-from typing import Union
+from typing import List, Tuple, Union
 
 import dill
 import numpy as np
@@ -20,7 +20,7 @@ from xaikenza.utils.parser_utils import overall_parser
 IndexType = Union[slice, Tensor, np.ndarray, Sequence]
 
 
-def get_num_features(hetero_data):
+def get_num_features(hetero_data: HeteroData) -> Tuple[int]:
     """Returns the number of node features and edge features in a HeteroData object.
 
     Args:
@@ -33,14 +33,14 @@ def get_num_features(hetero_data):
     return hetero_data["data_i"].x.shape[1], hetero_data["data_i"].edge_attr.shape[1]
 
 
-def convert_to_dicts(list_objects):
+def convert_to_dicts(list_objects: List[object]) -> List[dict]:
     """Converts a list of objects to a list of dictionaries.
 
     Args:
-        list_objects (List[]): List of objects.
+        list_objects (List[object]): List of objects.
 
     Returns:
-        List of dicts
+        List[dict]: List of dictionaries.
     """
     list_dicts = []
     for obj in list_objects:
@@ -48,14 +48,14 @@ def convert_to_dicts(list_objects):
     return np.array(list_dicts)
 
 
-def create_heterodata(input):
+def create_heterodata(input: dict) -> HeteroData:
     """Converts a pair of molecules with smiles, masks, activities, and mcs to a HeteroData object.
 
     Args:
         input (dict): Dictionary containing the data about a pair of compounds (smiles, masks, activities, mcs).
 
     Returns:
-        HeteroData object
+        HeteroData: HeteroData object containing the data about the pair of compounds.
     """
     hetero_data = HeteroData()
 
@@ -76,12 +76,14 @@ def create_heterodata(input):
     return hetero_data
 
 
-def rebalance_pairs(train_pairs, test_pairs, test_set_size=0.2):
+def rebalance_pairs(
+    train_pairs: List[HeteroData], test_pairs: List[HeteroData], test_set_size=0.2
+) -> Tuple[List[HeteroData], List[HeteroData]]:
     """Rebalances the pairs in the training and test sets to a 0.8/0.2 ratio.
 
     Args:
-        train_pairs (List of HeteroData): training pairs
-        test_pairs (List of HeteroData): testing pairs
+        train_pairs (List[HeteroData]): training pairs
+        test_pairs (List[HeteroData]): testing pairs
         test_set_size (float, optional): ratio of pairs in the test set. Defaults to 0.2.
     """
     n = len(train_pairs) / (1 - test_set_size)
@@ -93,18 +95,20 @@ def rebalance_pairs(train_pairs, test_pairs, test_set_size=0.2):
     return train_pairs, test_pairs
 
 
-def train_test_split_pairs(pairs_list, ligands_list, test_set_size, seed=42):
+def train_test_split_pairs(
+    pairs_list: List[HeteroData], ligands_list: List[str], test_set_size: float, seed=42
+) -> Tuple[List[HeteroData], List[HeteroData]]:
     """Split the ligands into training and test sets, construct training and test sets of pairs and rebalance them.
 
     Args:
-        pairs_list (List of HeteroData): list of pairs of ligands
-        ligands_list (List of str): list of the individual ligands present in the pairs
+        pairs_list (List[HeteroData]): list of pairs of ligands
+        ligands_list (List[str]): list of the individual ligands present in the pairs
         test_set_size (float): Ratio of pairs in the test set
         seed (int, optional): Defaults to 42.
 
     Returns:
-        List of HeteroData: rebalanced training pairs
-        List of HeteroData: rebalanced test pairs
+        List[HeteroData]: rebalanced training pairs
+        List[HeteroData]: rebalanced test pairs
     """
     train_ligands, test_ligands = train_test_split(
         ligands_list, random_state=seed, test_size=test_set_size
@@ -122,13 +126,13 @@ def train_test_split_pairs(pairs_list, ligands_list, test_set_size, seed=42):
     return rebalance_pairs(train_pairs, test_pairs, test_set_size)
 
 
-def create_ligands_list(pairs_list):
+def create_ligands_list(pairs_list: List[HeteroData]) -> List[str]:
     """Creates a list of ligands present in the pairs.
 
     Args:
-        pairs_list (List of HeteroData): list of pairs of ligands
+        pairs_list (List[HeteroData]): list of pairs of ligands
     Returns:
-        List of str: list of ligand smiles
+        List[str]: list of ligand smiles
     """
     ligands_list = []
     for pair in pairs_list:
@@ -144,7 +148,7 @@ def get_list_targets(data_ori_path="data/selected_processed_data"):
         data_ori_path (str, optional): directory with the processed data of protein targets. Defaults to "data/selected_processed_data".
 
     Returns:
-        List of str: list of targets present in the processed data folder
+        List[str]: list of targets present in the processed data folder
     """
     LIST_TARGETS = []
     for folder in os.listdir(data_ori_path):
