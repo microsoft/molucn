@@ -10,14 +10,14 @@ EPS = 1e-6
 
 
 class Explainer(object):
-    def __init__(self, device, model):
+    def __init__(self, device: torch.device, model: torch.nn.Module):
         self.device = device
         self.model = model
         self.model.eval()
         self.model_name = self.model.__class__.__name__
         self.name = self.__class__.__name__
 
-    def explain_graph(self, graph, **kwargs):
+    def explain_graph(self, graph: Data, **kwargs):
         """
         Main part for different graph attribution methods
         :param graph: target graph instance to be explained

@@ -1,8 +1,10 @@
 # Code adapted from tensorflow to pytorch from https://github.com/google-research/graph-attribution/tree/main/graph_attribution
 
 import torch
-from feat_attribution.explainer_base import Explainer
 from torch_geometric.data import Data
+
+from feat_attribution.explainer_base import Explainer
+
 
 class CAM(Explainer):
     """CAM: Decompose output as a linear sum of nodes and edges.
@@ -21,17 +23,17 @@ class CAM(Explainer):
         super(CAM, self).__init__(device, model)
         self.device = device
 
-    def explain_graph(self, graph: Data, model: torch.nn.Module =None) -> torch.Tensor:
+    def explain_graph(self, graph: Data, model: torch.nn.Module = None) -> torch.Tensor:
 
         if model == None:
             model = self.model
 
         tmp_graph = graph.clone().to(self.device)
-        
+
         node_act, edge_act = model.get_gap_activations(tmp_graph)
         weights = model.get_prediction_weights()
-        node_weights = torch.einsum('ij,j', node_act, weights)
-        edge_weights = torch.einsum('ij,j', edge_act, weights)
+        node_weights = torch.einsum("ij,j", node_act, weights)
+        edge_weights = torch.einsum("ij,j", edge_act, weights)
 
         for idx in range(graph.num_edges):
             e_imp = edge_weights[idx]

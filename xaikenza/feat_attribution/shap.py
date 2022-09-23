@@ -1,35 +1,39 @@
 # Code adapted from tensorflow to pytorch from https://github.com/google-research/graph-attribution/tree/main/graph_attribution
-import numpy as np
-from xaikenza.feat_attribution.explainer_base import Explainer
-from torch_geometric.data import Data
 from copy import deepcopy
+
 import numpy as np
 import scipy.special
 import torch
+from torch_geometric.data import Data
+from xaikenza.feat_attribution.explainer_base import Explainer
+
 
 def normalize(a, min, max):
-    return (a - min)/ (max - min)
-    
-    
+    return (a - min) / (max - min)
+
+
 class SHAP(Explainer):
-    """ KernelSHAP explainer - adapted to GNNs
+    """KernelSHAP explainer - adapted to GNNs
     Explains only node features
     """
-    def __init__(self, device, model, num_features):
+
+    def __init__(self, device: torch.device, model: torch.nn.Module, num_features: int):
         super(SHAP, self).__init__(device, model)
         # number of nonzero features - for each node index
         self.M = num_features
         self.neighbours = None
         self.F = self.M
 
-    def explain_graph(self, graph, model=None, num_samples=10):
+    def explain_graph(
+        self, graph: Data, model: torch.nn.Module = None, num_samples: int = 10
+    ) -> torch.Tensor:
         """
         :param node_index: index of the node of interest
         :param hops: number k of k-hop neighbours to consider in the subgraph around node_index
-        :param num_samples: number of samples we want to form GraphSVX's new dataset 
+        :param num_samples: number of samples we want to form GraphSVX's new dataset
         :return: shapley values for features that influence node v's pred
         """
-        
+
         if model == None:
             model = self.model
         # Compute true prediction of model, for original instance
@@ -38,8 +42,8 @@ class SHAP(Explainer):
         tmp_graph = graph.clone().to(self.device)
         # Determine z => features whose importance is investigated
         # Decrease number of samples because nodes are not considered
-        num_samples = num_samples//3
-        
+        num_samples = num_samples // 3
+
         node_weights = np.zeros(tmp_graph.x.size(0))
         # Consider all features (+ use expectation like below)
         # feat_idx = torch.unsqueeze(torch.arange(self.F), 1)
@@ -59,14 +63,14 @@ class SHAP(Explainer):
 
             # OLS estimator for weighted linear regression
             phi, base_value = self.OLS(z_, weights, fz)  # dim (M*num_classes)
-            
+
             node_weights[node_index] = phi.sum()
         return node_weights
 
     def shapley_kernel(self, s):
         """
         :param s: dimension of z' (number of features + neighbours included)
-        :return: [scalar] value of shapley value 
+        :return: [scalar] value of shapley value
         """
         shap_kernel = []
         # Loop around elements of s in order to specify a special case
@@ -76,21 +80,22 @@ class SHAP(Explainer):
             # Put an emphasis on samples where all or none features are included
             if a == 0 or a == self.M:
                 shap_kernel.append(1000)
-            elif scipy.special.binom(self.M, a) == float('+inf'):
-                shap_kernel.append(1/self.M)
+            elif scipy.special.binom(self.M, a) == float("+inf"):
+                shap_kernel.append(1 / self.M)
             else:
                 shap_kernel.append(
-                    (self.M-1)/(scipy.special.binom(self.M, a)*a*(self.M-a)))
+                    (self.M - 1) / (scipy.special.binom(self.M, a) * a * (self.M - a))
+                )
         return torch.tensor(shap_kernel)
 
     def compute_pred(self, graph, node_index, num_samples, z_):
         """
         Variables are exactly as defined in explainer function, where compute_pred is used
-        This function aims to construct z' (from z and x_v) and then to compute f(z'), 
-        meaning the prediction of the new instances with our original model. 
+        This function aims to construct z' (from z and x_v) and then to compute f(z'),
+        meaning the prediction of the new instances with our original model.
         In fact, it builds the dataset (z, f(z')), required to train the weighted linear model.
         :return fz: probability of belonging to each target classes, for all samples z'
-        fz is of dimension N*C where N is num_samples and C num_classses. 
+        fz is of dimension N*C where N is num_samples and C num_classses.
         """
         # This implies retrieving z from z' - wrt sampled neighbours and node features
         # We start this process here by storing new node features for v and neigbours to
@@ -116,12 +121,12 @@ class SHAP(Explainer):
             # Apply model on (X,A) as input.
             with torch.no_grad():
                 fz[i] = self.model(graph)
-            
+
         return fz
 
     def OLS(self, z_, weights, fz):
         """
-        :param z_: z - binary vector  
+        :param z_: z - binary vector
         :param weights: shapley kernel weights for z
         :param fz: f(z') where z is a new instance - formed from z and x
         :return: estimated coefficients of our weighted linear regression - on (z, f(z'))
@@ -135,14 +140,14 @@ class SHAP(Explainer):
             tmp = np.linalg.inv(np.dot(np.dot(z_.T, np.diag(weights)), z_))
         except np.linalg.LinAlgError:  # matrix not invertible
             tmp = np.dot(np.dot(z_.T, np.diag(weights)), z_)
-            tmp = np.linalg.inv(
-                tmp + np.diag(0.00001 * np.random.randn(tmp.shape[1])))
-        phi = np.dot(tmp, np.dot(
-            np.dot(z_.T, np.diag(weights)), fz.cpu().detach().numpy()))
+            tmp = np.linalg.inv(tmp + np.diag(0.00001 * np.random.randn(tmp.shape[1])))
+        phi = np.dot(
+            tmp, np.dot(np.dot(z_.T, np.diag(weights)), fz.cpu().detach().numpy())
+        )
 
         # Test accuracy
         # y_pred=z_.detach().numpy() @ phi
-        #	print('r2: ', r2_score(fz, y_pred))
-        #	print('weighted r2: ', r2_score(fz, y_pred, weights))
+        # 	print('r2: ', r2_score(fz, y_pred))
+        # 	print('weighted r2: ', r2_score(fz, y_pred, weights))
 
         return phi[:-1], phi[-1]

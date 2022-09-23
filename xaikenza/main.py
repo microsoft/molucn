@@ -95,14 +95,10 @@ def overall_parser():
     parser.add_argument(
         "--pool", type=str, default="mean", help="pool strategy."
     )  # mean, max, add, att
-    # parser.add_argument('--heads', type=int, default=1,
-    # help='Number of pool heads. If heads = 1, then same pool is applied to the whole molecule and the uncommon nodes.\
-    # If heads = 2, then two different pool is applied to the whole molecule and the uncommon nodes.')
-
     # Loss type
     parser.add_argument(
         "--loss", type=str, default="MSE", help="Type of loss for training GNN."
-    )  # ['MSE', 'MSE+UCN', 'MSE+UCNlocal, 'MSE+UCN+AC']
+    )  # ['MSE', 'MSE+UCN', 'MSE+UCNlocal, 'MSE+AC']
     parser.add_argument(
         "--lambda1",
         type=float,

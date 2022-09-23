@@ -1,19 +1,20 @@
 # Code adapted from tensorflow to pytorch from https://github.com/josejimenezluna/xaibench_tf
 
 from copy import deepcopy
+from typing import List
 
 import torch
+from torch_geometric.data import Data
 
 from feat_attribution.explainer_base import Explainer
-from torch_geometric.data import Data
 
 
 class Diff(Explainer):
-    def __init__(self, device, model):
+    def __init__(self, device: torch.device, model: torch.nn.Module):
         super(Diff, self).__init__(device, model)
         self.device = device
 
-    def explain_graph(self, graph, model=None):
+    def explain_graph(self, graph: Data, model: torch.nn.Module = None) -> torch.Tensor:
 
         if model == None:
             model = self.model
@@ -28,7 +29,7 @@ class Diff(Explainer):
         return node_weights.cpu().detach().numpy()
 
 
-def gen_masked_atom_feats(og_g):
+def gen_masked_atom_feats(og_g: Data) -> List[Data]:
     """
     Given a graph, returns a list of graphs where individual atoms
     are masked.

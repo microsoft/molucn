@@ -3,10 +3,11 @@ import torch
 from torch.autograd import Variable
 
 from feat_attribution.explainer_base import Explainer
+from torch_geometric.data import Data
 
 
 class GradInput(Explainer):
-    def __init__(self, device, model):
+    def __init__(self, device: torch.device, model: torch.nn.Module):
         super(GradInput, self).__init__(device, model)
         self.device = device
 

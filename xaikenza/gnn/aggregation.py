@@ -1,3 +1,6 @@
+# Pytorch Geometric class - Aggregation operator for GNNs
+# SOURCE CODE FOR TORCH_GEOMETRIC.NN.AGGR.BASE
+
 from typing import Optional, Tuple
 
 import torch

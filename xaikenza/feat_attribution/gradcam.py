@@ -1,8 +1,10 @@
 # Code adapted from tensorflow to pytorch from https://github.com/google-research/graph-attribution/tree/main/graph_attribution
 
 import torch
-from feat_attribution.explainer_base import Explainer
 from torch_geometric.data import Data
+
+from feat_attribution.explainer_base import Explainer
+
 
 class GradCAM(Explainer):
     """GradCAM: intermediate activations and gradients as input importance.
@@ -19,8 +21,8 @@ class GradCAM(Explainer):
     Based on "Grad-CAM: Visual Explanations from Deep Networks via Gradient-based
     Localization" (https://arxiv.org/abs/1610.02391).
     """
-    
-    def __init__(self, device, model, last_layer_only: bool = False):
+
+    def __init__(self, device: torch.device, model: torch.nn.Module, last_layer_only: bool = False):
         """GradCAM constructor.
         Args:
           last_layer_only: If to use only the last layer activations, if not will
@@ -32,21 +34,21 @@ class GradCAM(Explainer):
         self.device = device
         self.last_layer_only = last_layer_only
 
-    def explain_graph(self, graph: Data, model: torch.nn.Module =None) -> torch.Tensor:
+    def explain_graph(self, graph: Data, model: torch.nn.Module = None) -> torch.Tensor:
 
         if model == None:
             model = self.model
 
         tmp_graph = graph.clone().to(self.device)
-        
+
         acts, grads, _ = model.get_intermediate_activations_gradients(tmp_graph)
         node_w, edge_w = [], []
         layer_indices = [-1] if self.last_layer_only else list(range(len(acts)))
         for index in layer_indices:
             node_act, edge_act = acts[index]
             node_grad, edge_grad = grads[index]
-            node_w.append(torch.einsum('ij,ij->i', node_act, node_grad))
-            edge_w.append(torch.einsum('ij,ij->i', edge_act, edge_grad))
+            node_w.append(torch.einsum("ij,ij->i", node_act, node_grad))
+            edge_w.append(torch.einsum("ij,ij->i", edge_act, edge_grad))
 
         node_weights = torch.stack(node_w, dim=0).sum(dim=0)
         edge_weights = torch.stack(edge_w, dim=0).sum(dim=0)
