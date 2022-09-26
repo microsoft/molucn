@@ -1,3 +1,5 @@
+# Define the path to the data, model, logs, results, and colors
+# 
 import os
 
 if 'AMLT_DATA_DIR' in os.environ:

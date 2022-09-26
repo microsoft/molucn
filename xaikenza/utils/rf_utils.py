@@ -1,14 +1,18 @@
 from copy import deepcopy
+from typing import Callable, List, Tuple
 
 import numpy as np
+import rdkit
+import torch.nn as nn
 from rdkit.Chem import AllChem, DataStructs, MolFromSmiles
+from torch_geometric.data import Data, HeteroData
 from tqdm import tqdm
 
 FP_SIZE = 1024
 BOND_RADIUS = 2
 
 
-def gen_dummy_atoms(mol, dummy_atom_no=47):
+def gen_dummy_atoms(mol: rdkit.Mol, dummy_atom_no: int = 47) -> List[rdkit.Mol]:
     """
     Given a specific rdkit mol, returns a list of mols where each individual atom
     has been replaced by a dummy atom type.
@@ -22,9 +26,9 @@ def gen_dummy_atoms(mol, dummy_atom_no=47):
     return mod_mols
 
 
-def featurize_ecfp4(mol, fp_size=FP_SIZE, bond_radius=BOND_RADIUS):
+def featurize_ecfp4(mol: rdkit.Mol, fp_size=FP_SIZE, bond_radius=BOND_RADIUS):
     """
-    Gets an ECFP4 fingerprint for a specific rdkit mol. 
+    Gets an ECFP4 fingerprint for a specific rdkit mol.
     """
     fp = AllChem.GetMorganFingerprintAsBitVect(mol, bond_radius, nBits=fp_size)
     arr = np.zeros((1,), dtype=np.float32)
@@ -32,12 +36,14 @@ def featurize_ecfp4(mol, fp_size=FP_SIZE, bond_radius=BOND_RADIUS):
     return arr
 
 
-
-def pred_pairs_diff(pair_df, model, mol_read_f=MolFromSmiles):
+def pred_pairs_diff(
+    pair_df: List[HeteroData], model: nn.Module, mol_read_f: Callable = MolFromSmiles
+) -> List[float]:
+    """Computes the activity cliff for all pairs of molecules in `pair_df`."""
     preds_diff = []
 
     for row in tqdm(pair_df.itertuples(), total=len(pair_df)):
-        data_i, data_j = row['data_i'], row['data_j']
+        data_i, data_j = row["data_i"], row["data_j"]
         sm_i, sm_j = data_i.smiles, data_j.smiles
         mol_i, mol_j = mol_read_f(sm_i), mol_read_f(sm_j)
         fp_i, fp_j = featurize_ecfp4(mol_i), featurize_ecfp4(mol_j)
@@ -50,8 +56,9 @@ def pred_pairs_diff(pair_df, model, mol_read_f=MolFromSmiles):
     return preds_diff
 
 
-
-def color_pairs_diff(pair_df, model, diff_fun):
+def color_pairs_diff(
+    pair_df: List[HeteroData], model: nn.Module, diff_fun: Callable
+) -> List[Tuple[float]]:
     """
     Uses Sheridan's (2019) method to color all pairs of molecules
     available in `pair_df`.
@@ -59,7 +66,7 @@ def color_pairs_diff(pair_df, model, diff_fun):
     colors = []
 
     for row in tqdm(pair_df.itertuples(), total=len(pair_df)):
-        data_i, data_j = row['data_i'], row['data_j']
+        data_i, data_j = row["data_i"], row["data_j"]
         color_i, color_j = (
             diff_fun(data_i.smiles, model.predict),
             diff_fun(data_j.smiles, model.predict),
@@ -68,14 +75,13 @@ def color_pairs_diff(pair_df, model, diff_fun):
     return colors
 
 
-
 def diff_mask(
-    mol_string,
-    pred_fun,
-    fp_size=1024,
-    bond_radius=2,
-    dummy_atom_no=47,
-    mol_read_f=MolFromSmiles,
+    mol_string: str,
+    pred_fun: Callable,
+    fp_size: int = 1024,
+    bond_radius: int = 2,
+    dummy_atom_no: int = 47,
+    mol_read_f: Callable = MolFromSmiles,
 ):
     """
     Given a mol specified by a string (SMILES, inchi), uses Sheridan's method (2019)
@@ -94,8 +100,8 @@ def diff_mask(
     return og_pred - mod_preds
 
 
-def gen_masked_atom_feats(og_g):
-    """ 
+def gen_masked_atom_feats(og_g: Data):
+    """
     Given a graph, returns a list of graphs where individual atoms
     are masked.
     """
@@ -105,4 +111,3 @@ def gen_masked_atom_feats(og_g):
         g[0]["nodes"][node_idx] *= 0.0
         masked_gs.append(g[0])
     return masked_gs
-

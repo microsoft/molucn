@@ -1,5 +1,6 @@
 import os
 import os.path as osp
+import sys
 import time
 
 import dill
@@ -15,8 +16,6 @@ from xaikenza.utils.parser_utils import overall_parser
 from xaikenza.utils.train_utils import DEVICE, test_epoch, train_epoch  # move to
 from xaikenza.utils.utils import set_seed
 
-import sys
-
 print(sys.path)
 
 
@@ -26,6 +25,8 @@ data_dir = os.environ["AMLT_DATA_DIR"]
 
 
 def train_gnn(args, save_model=True):
+    """Train the GNN model and save the logs (rmse, pcc scores) and the model"""
+
     set_seed(args.seed)
     train_params = (
         f"{args.conv}_{args.loss}_{args.pool}_{args.lambda1}_{args.explainer}"
@@ -163,7 +164,9 @@ def train_gnn(args, save_model=True):
 
     # Save GNN scores
     os.makedirs(args.log_path, exist_ok=True)
-    global_res_path = osp.join(args.log_path, f"model_scores_gnn_{train_params}_{args.target}")
+    global_res_path = osp.join(
+        args.log_path, f"model_scores_gnn_{train_params}_{args.target}"
+    )
     df = pd.DataFrame(
         [
             [

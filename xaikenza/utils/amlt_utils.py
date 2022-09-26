@@ -1,3 +1,5 @@
+# Read amlt results and save them in a single csv file
+
 import pandas as pd
 import numpy as np
 import os

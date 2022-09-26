@@ -3,7 +3,7 @@ from functools import wraps
 import numpy as np
 import torch
 from torch import nn
-from torch_geometric.data import Batch
+from torch_geometric.data import Batch, DataLoader
 from tqdm import tqdm
 from xaikenza.gnn.loss import loss_uncommon_node, loss_uncommon_node_local
 
@@ -12,15 +12,14 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 MSE_LOSS_FN = nn.MSELoss()
 
 
-# General function for training graph classification(regresion) task and
-# node classification task under multiple graphs.
 def train_epoch(
-    train_loader,  # def train_epoch
-    model: nn.Module,  # type hints
-    optimizer,
-    loss_type: str = 'MSE',
+    train_loader: DataLoader,
+    model: nn.Module,
+    optimizer: torch.optim,
+    loss_type: str = "MSE",
     lambda1: int = 1,
 ):
+    """Train the model for one epoch."""
     model.train()
     loss_all = 0
 
@@ -33,14 +32,14 @@ def train_epoch(
         optimizer.zero_grad()
         data_i, data_j = data_i.to(DEVICE), data_j.to(DEVICE)
         out_i, out_j = torch.squeeze(model(data_i)), torch.squeeze(model(data_j))
-        if out_i.dim()==0:
+        if out_i.dim() == 0:
             out_i = out_i.unsqueeze(0)
-        if out_j.dim()==0:
+        if out_j.dim() == 0:
             out_j = out_j.unsqueeze(0)
-            
-        mse_i, mse_j = MSE_LOSS_FN(
-            out_i, data_i.y.to(DEVICE)
-        ), MSE_LOSS_FN(out_j, data_j.y.to(DEVICE))
+
+        mse_i, mse_j = MSE_LOSS_FN(out_i, data_i.y.to(DEVICE)), MSE_LOSS_FN(
+            out_j, data_j.y.to(DEVICE)
+        )
         loss = (mse_i + mse_j) / 2
 
         if loss_type == "MSE+UCNlocal":
@@ -58,8 +57,7 @@ def train_epoch(
         else:
             if loss_type == "MSE+AC":
                 loss += MSE_LOSS_FN(
-                    out_i - out_j,
-                    data_i.y.to(DEVICE) - data_j.y.to(DEVICE)
+                    out_i - out_j, data_i.y.to(DEVICE) - data_j.y.to(DEVICE)
                 )
             elif loss_type == "MSE+UCN":
                 loss += lambda1 * loss_uncommon_node(data_i, data_j, model)
@@ -73,11 +71,8 @@ def train_epoch(
     return loss_all / total
 
 
-# Gtest / val do not need to compute metrics on a batch basis
-def test_epoch(
-    test_loader,
-    model,
-):
+def test_epoch(test_loader: DataLoader, model: nn.Module):
+    """Evaluates the trained GNN model on the testing pairs with RMSE and PCC metrics."""
 
     model.eval()
     error = 0
@@ -120,6 +115,8 @@ def test_epoch(
 
 
 def overload(func):
+    """This function is used in the model class to overload the forward function."""
+
     @wraps(func)
     def wrapper(*args, **kargs):
         if len(args) + len(kargs) == 2:
