@@ -1,11 +1,7 @@
 
 import os
-import re
-import numpy as np
 import pandas as pd
 
-import seaborn as sns
-import matplotlib.pyplot as plt
 print(os.getcwd())
 import sys
 sys.path.append('/home/t-kenzaamara/molucn/')

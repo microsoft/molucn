@@ -163,7 +163,7 @@ def train_gnn(args, save_model=True):
 
     # Save GNN scores
     os.makedirs(args.log_path, exist_ok=True)
-    global_res_path = osp.join(args.log_path, f"model_scores_gnn_{train_params}.csv")
+    global_res_path = osp.join(args.log_path, f"model_scores_gnn_{train_params}_{args.target}")
     df = pd.DataFrame(
         [
             [

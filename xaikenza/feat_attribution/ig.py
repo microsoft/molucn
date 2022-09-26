@@ -1,9 +1,11 @@
 # Code adapted from tensorflow to pytorch from https://github.com/google-research/graph-attribution/tree/main/graph_attribution
 from copy import deepcopy
-import torch
+
 import networkx as nx
-from feat_attribution.explainer_base import Explainer
+import torch
 from torch_geometric.data import Data
+from xaikenza.feat_attribution.explainer_base import Explainer
+
 
 def gen_steps(graph, n_steps: int, version=2):
     """
@@ -15,7 +17,6 @@ def gen_steps(graph, n_steps: int, version=2):
     feat = graph.x
     if version == 3:
         e_feat = graph.edge_attr
-    
 
     for step in range(1, n_steps + 1):
         factor = step / n_steps
@@ -32,16 +33,23 @@ class IntegratedGradient(Explainer):
         super(IntegratedGradient, self).__init__(device, model)
         self.device = device
 
-    def explain_graph(self, graph: Data, model: torch.nn.Module =None, n_steps: int = 50, version: int = 2, feature_scale: bool = True) -> torch.Tensor:
-        
+    def explain_graph(
+        self,
+        graph: Data,
+        model: torch.nn.Module = None,
+        n_steps: int = 50,
+        version: int = 2,
+        feature_scale: bool = True,
+    ) -> torch.Tensor:
+
         """Computes path integral of the node features of `graph` for a
-        specific `task` number, using a Monte Carlo approx. of `n_steps`. 
+        specific `task` number, using a Monte Carlo approx. of `n_steps`.
 
         Parameters
         ----------
         graph : DGL graph
         g_feat : torch.Tensor
-        model : MPNN 
+        model : MPNN
         task : int, optional
         n_steps : int, optional
         version : int, optional
@@ -57,7 +65,7 @@ class IntegratedGradient(Explainer):
             model = self.model
 
         tmp_graph = graph.clone().to(self.device)
-    
+
         graphs = gen_steps(tmp_graph, n_steps=n_steps, version=version)
         values_atom = []
         values_bond = []
@@ -69,23 +77,23 @@ class IntegratedGradient(Explainer):
             pred.backward()
             atom_grads = g.x.grad.unsqueeze(2)
             bond_grads = g.edge_attr.grad.unsqueeze(2)
-            
+
             values_atom.append(atom_grads)
             values_bond.append(bond_grads)
 
         node_weights = torch.cat(values_atom, dim=2).mean(dim=2).cpu()
         edge_weights = torch.cat(values_bond, dim=2).mean(dim=2).cpu()
-    
+
         if feature_scale:
             node_weights *= graph.x
             edge_weights *= graph.edge_attr
-            
+
         node_weights = node_weights.sum(dim=1).numpy()
         edge_weights = edge_weights.sum(dim=1).numpy()
-        
+
         for idx in range(graph.num_edges):
             e_imp = edge_weights[idx]
             node_weights[graph.edge_index[0, idx]] += e_imp / 2
             node_weights[graph.edge_index[1, idx]] += e_imp / 2
-            
+
         return node_weights

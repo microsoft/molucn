@@ -11,11 +11,11 @@ import matplotlib.style
 import matplotlib as mpl
 mpl.style.use('classic')
 #matplotlib.rc('font', family='sans-serif') 
-#matplotlib.rc('text', usetex='True')
+matplotlib.rc('text', usetex='True')
 from collections import Counter
 sns.set_theme(style="whitegrid")
 matplotlib.rcParams["figure.facecolor"] = "white"
-par_dir = '/home/t-kenzaamara/molucn'
+par_dir = '/home/t-kenzaamara/internship2022'
 
 # %%
 
@@ -47,95 +47,6 @@ attr_res['acc_test_%'] = attr_res['acc_test'].apply(lambda x: x*100)
 attr_res['acc_train_%'] = attr_res['acc_train'].apply(lambda x: x*100)
 attr_res['global_dir_test_%'] = attr_res['global_dir_test'].apply(lambda x: x*100)
 attr_res['global_dir_train_%'] = attr_res['global_dir_train'].apply(lambda x: x*100)
-
-
-
-# %%
-res_50 = attr_res[attr_res.mcs==50]
-
-large_targets = ['1M17-AQ4',
- '3IND-593',
- '1RNE-C60',
- '2J5F-DJK',
- '5EOL-5QO',
- '5A09-JJD',
- '2XB7-GUI',
- '1UDT-VIA',
- '2E9P-77A',
- '1DB4-8IN']
-
-
-df_large = res_50.loc[res_50.target.isin(large_targets)]
-df_large
-#%%
-df_large[df_large.explainer=='rf']
-
-#%%
-
-# Test pairs
-fig, axs = plt.subplots(1, 3, figsize=(18,6), sharey=True, sharex=True)
-
-sns.lineplot(
-    x="target",
-    y="global_dir_test_%",
-    data=df_large[(df_large.loss=='MSE')|(df_large.loss=='RF')],
-    hue="explainer",
-    marker="o",
-    markersize=7,
-    lw=2.5,
-    markeredgecolor='none',
-    ci=None,
-    legend=False,
-    palette=dict_color,
-    ax=axs[0]
-)
-axs[0].set_title("Loss = MSE", pad=10)
-axs[0].set_ylabel("Global direction (%)", labelpad=10)
-axs[0].set(xlabel=None)
-
-sns.lineplot(
-    x="target",
-    y="global_dir_test_%",
-    data=df_large[(df_large.loss=='MSE+AC')|(df_large.loss=='RF')],
-    hue="explainer",
-    marker="o",
-    markersize=7,
-    lw=2.5,
-    markeredgecolor='none',
-    ci=None,
-    legend=False,
-    palette=dict_color,
-    ax=axs[1]
-)
-axs[1].set_title("Loss = MSE + AC", pad=10)
-axs[1].set(xlabel=None)
-
-g = sns.lineplot(
-    x="target",
-    y="global_dir_test_%",
-    data=df_large[(df_large.loss=='MSE+UCN')|(df_large.loss=='RF')],
-    hue="explainer",
-    marker="o",
-    markersize=7,
-    lw=2.5,
-    markeredgecolor='none',
-    ci=None,
-    palette=dict_color,
-    ax=axs[2]
-)
-axs[2].set_title("Loss = MSE + UCN", pad=10)
-axs[2].set(xlabel=None)
-legend = plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', handlelength=1, frameon=False, borderaxespad=0, title='Feature Attribution')
-for t in legend.get_texts():
-    t.set_text(leg_labels[t.get_text()])
-for i in range(7):
-    legend.get_lines()[i].set_linewidth(6)
-
-fig.text(0.45, -0.04, "Largest protein targets", ha='center', fontsize=22)
-plt.tight_layout()
-plt.savefig(os.path.join(par_dir, 'figures/gdir_test_large_targets.pdf'), bbox_inches="tight")
-
-
 
 
 # %%
@@ -213,48 +124,64 @@ axs[1,2].set_visible(False)
 red_patch = mpatches.Patch(color=pal[0], label='MSE', alpha=0.7)
 blue_patch = mpatches.Patch(color=pal[1], label='MSE+UCN', alpha=0.7)
 fig.legend(handles=[red_patch, blue_patch], title = 'Loss', bbox_to_anchor=(0.85, 0.29), handlelength=1, frameon=True, borderaxespad=0)
-fig.text(0.5, -0.04, "% Global direction improvement", ha='center', fontsize=30)
+fig.text(0.5, -0.04, "\% Global direction improvement", ha='center', fontsize=30)
 fig.text(-0.01, 0.27, "Number of targets", ha='center',rotation=90, fontsize=30)
 plt.tight_layout(pad=2)
 plt.savefig(os.path.join(par_dir, 'figures/gdir_test_by_target_barplot.pdf'), bbox_inches="tight")
 
 
 
-
-
-
-# %% 
-
 ########## HEATMAP ############
-bins = [0,10,20,30,40,50,60,70,80,90,100]
+#%%
+bins = np.arange(0, 105, 5)
+print(bins)
 df['binned_MSE'] = pd.cut(x=df['MSE'], bins=bins)
 df['binned_MSE+UCN'] = pd.cut(x=df['MSE+UCN'], bins=bins)
-df[['binned_MSE', 'binned_MSE', 'target']].pivot()
-# %% 
-fig, axs = plt.subplots(2, 3, figsize=(18,12), sharey=True, sharex=True)
+df['ticks_MSE'] = df['binned_MSE'].apply(lambda x: x.right)
+df['ticks_MSE+UCN'] = df['binned_MSE+UCN'].apply(lambda x: x.right)
 
-gnn_explainers=["diff", "gradinput", "ig", "cam", "gradcam", "shap"]
+
+# %% 
+
+
+sns.set_context("notebook", rc={"legend.fontsize":27, "legend.title_fontsize":27, 
+                                "axes.titlesize":35,"axes.labelsize":27,
+                               "xtick.labelsize" : 24, "ytick.labelsize" : 24})
+
+
+fig, axs = plt.subplots(2, 3, figsize=(18,12), sharey=True, sharex=True)
+cbar_ax = fig.add_axes([.7, .04, .04, .41])
+gnn_explainers=["diff", "gradinput", "ig", "cam", "gradcam"]#, "shap"]
 for i, explainer in enumerate(gnn_explainers):
     df_expl = df[df.explainer==explainer]
-    sns.heatmap(data=df_expl.pivot("MSE+UCN", "MSE"),
-        #marker="o",
-        legend=False,
-        ax=axs[i//3,i%3],
-    )
+    df_expl = df_expl[['ticks_MSE', 'ticks_MSE+UCN', 'target']]
+    df_expl = df_expl.groupby(['ticks_MSE', 'ticks_MSE+UCN']).count().reset_index()
+    df_expl = df_expl.pivot('ticks_MSE+UCN', 'ticks_MSE', 'target')
+    #df_expl = df_expl.reindex(df_expl.sort_values(by='ticks_MSE+UCN', ascending=False).index)
+    xticklabels = range(0, 105, 5)
+    # the index position of the tick labels
+    xticks = []
+    for label in xticklabels:
+        idx_pos = df.index.get_loc(label)
+        xticks.append(idx_pos)
+    g = sns.heatmap(df_expl, cmap="Blues", ax=axs[i//3,i%3], cbar=i==0, cbar_ax=None if i else cbar_ax, square=True,
+                vmin=0)#, vmax=70)
+    axs[i//3,i%3].axes.invert_yaxis()
     axs[i//3,i%3].plot([0,100], [0,100], ls="--", c='black', lw=2)
-    axs[i//3,i%3].set_title(f"{leg_labels[explainer]}", pad=10)
+    axs[i//3,i%3].set_title(f"{leg_labels[explainer]}", pad=30)
     axs[i//3,i%3].set(xlabel=None, ylabel=None)
-    axs[i//3,i%3].set_xticks([0,20,40,60,80,100])
-    axs[i//3,i%3].set_yticks([0,20,40,60,80,100])
-    alpha = int(np.mean(df_expl.better)*100)
-    axs[i//3,i%3].text(-10,110,r'$g_{\mathrm{dir}}$'+' higher\nwith UCN: '+r'\textbf{'+'{}'.format(alpha)+r'}\%', fontsize=20, 
-                       bbox =dict(facecolor=pal[0], edgecolor='black', linewidth=4, boxstyle='round,pad=0.4',alpha=0.3))
+    axs[i//3,i%3].set_xticks(np.linspace(0,20,6))
+    axs[i//3,i%3].set_yticks(np.linspace(0,20,6))
+    axs[i//3,i%3].set_xticklabels([0, 20, 40, 60, 80, 100], rotation=0)
+    axs[i//3,i%3].set_yticklabels([0, 20, 40, 60, 80, 100], rotation=0)
+    cbar_ax.set_ylabel('Number of targets', rotation=270, fontsize=27, labelpad=50)
+    cbar_ax.tick_params(labelsize=26, pad=10)
 
-fig.text(0.53, -0.04, "Global direction with MSE loss (\%)", ha='center', fontsize=30)
-fig.text(-0.01, 0.17, "Global direction with MSE+UCN loss (\%)", ha='center',rotation=90, fontsize=30)
-plt.ylim(-10,)
-plt.tight_layout()
-
+axs[1,2].set_visible(False)
+fig.text(0.53, -0.05,'Global direction with '+r'$\mathcal{L}_{\mathrm{MSE}}$'+' (\%)', ha='center', fontsize=35)
+fig.text(0, 0.17, 'Global direction with '+r'$\mathcal{L}_{\mathrm{MSE+UCN}}$'+' (\%)', ha='center',rotation=90, fontsize=35)
+fig.tight_layout()
+plt.savefig(os.path.join(par_dir, 'figures/gdir_heatmap.pdf'), bbox_inches="tight")
 
 
 
@@ -269,10 +196,9 @@ plt.tight_layout()
 # %% 
 ###### MANTA RAY PLOT ##########
 
-sns.set_context("notebook", rc={"legend.fontsize":15, "legend.title_fontsize":27, 
-                                "axes.titlesize":27,"axes.labelsize":27,
-                               "xtick.labelsize" : 22, "ytick.labelsize" : 22}) 
-
+sns.set_context("notebook", rc={"legend.fontsize":27, "legend.title_fontsize":27, 
+                                "axes.titlesize":35,"axes.labelsize":27,
+                               "xtick.labelsize" : 24, "ytick.labelsize" : 24})
 
 fig, axs = plt.subplots(2, 3, figsize=(18,12), sharey=True, sharex=True)
 
@@ -283,6 +209,7 @@ for i, explainer in enumerate(gnn_explainers):
         x="MSE",
         y="MSE+UCN",
         data=df_expl,
+        #color='tab:brown',
         color=dict_color[explainer],
         #marker="o",
         legend=False,
@@ -295,15 +222,15 @@ for i, explainer in enumerate(gnn_explainers):
     axs[i//3,i%3].set(xlabel=None, ylabel=None)
     axs[i//3,i%3].set_xticks([0,20,40,60,80,100])
     axs[i//3,i%3].set_yticks([0,20,40,60,80,100])
-    alpha = int(np.mean(df_expl.better)*100)
+    alpha = round(np.mean(df_expl.better)*100, 1)
     axs[i//3,i%3].text(-10,110,r'$g_{\mathrm{dir}}$'+' higher\nwith UCN: '+r'\textbf{'+'{}'.format(alpha)+r'}\%', fontsize=20, 
                        bbox =dict(facecolor=pal[0], edgecolor='black', linewidth=4, boxstyle='round,pad=0.4',alpha=0.3))
 axs[1,2].set_visible(False)
-fig.text(0.53, -0.04, "Global direction with MSE loss (\%)", ha='center', fontsize=30)
-fig.text(-0.01, 0.17, "Global direction with MSE+UCN loss (\%)", ha='center',rotation=90, fontsize=30)
+fig.text(0.53, -0.05, 'Global direction with '+r'$\mathcal{L}_{\mathrm{MSE}}$'+' (\%)', ha='center', fontsize=35)
+fig.text(-0.02, 0.17, 'Global direction with'+r'$\mathcal{L}_{\mathrm{MSE+UCN}}$'+' (\%)', ha='center',rotation=90, fontsize=35)
 plt.ylim(-10,)
 plt.tight_layout()
-plt.savefig(os.path.join(par_dir, 'figures/gdir_test_by_target.pdf'), bbox_inches="tight")
+plt.savefig(os.path.join(par_dir, 'figures/gdir_test_by_target_colors.pdf'), bbox_inches="tight")
 
 ##### FEATURE ATTRIBUTION ######
 ###############################################################################

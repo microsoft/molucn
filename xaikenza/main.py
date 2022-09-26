@@ -2,8 +2,8 @@ import argparse
 import os
 import os.path as osp
 import time
-from tkinter import Y
 import warnings
+from tkinter import Y
 
 import dill
 import numpy as np
@@ -95,10 +95,14 @@ def overall_parser():
     parser.add_argument(
         "--pool", type=str, default="mean", help="pool strategy."
     )  # mean, max, add, att
+    # parser.add_argument('--heads', type=int, default=1,
+    # help='Number of pool heads. If heads = 1, then same pool is applied to the whole molecule and the uncommon nodes.\
+    # If heads = 2, then two different pool is applied to the whole molecule and the uncommon nodes.')
+
     # Loss type
     parser.add_argument(
         "--loss", type=str, default="MSE", help="Type of loss for training GNN."
-    )  # ['MSE', 'MSE+UCN', 'MSE+UCNlocal, 'MSE+AC']
+    )  # ['MSE', 'MSE+UCN', 'MSE+UCNlocal, 'MSE+UCN+AC']
     parser.add_argument(
         "--lambda1",
         type=float,
@@ -268,7 +272,9 @@ def main(args):
 
     # Save GNN scores
     os.makedirs(args.log_path, exist_ok=True)
-    global_res_path = osp.join(args.log_path, f"model_scores_gnn_{train_params}.csv")
+    global_res_path = osp.join(
+        args.log_path, f"model_scores_gnn_{train_params}_{args.target}.csv"
+    )
     df = pd.DataFrame(
         [
             [
@@ -340,7 +346,7 @@ def main(args):
     time_explainer = (time.time() - t0) / len(trainval_dataset)
     print("Average time to generate 1 explanation: ", time_explainer)
     test_colors = get_colors(test_dataset, explainer)
-    
+
     # Save colors
     os.makedirs(osp.join(args.color_path, args.explainer, args.target), exist_ok=True)
     with open(
@@ -348,7 +354,7 @@ def main(args):
             args.color_path,
             args.explainer,
             args.target,
-            f"{args.target}_seed_{args.seed}_{args.explainer}_train.pt",
+            f"{args.target}_seed_{args.seed}_{train_params}_train.pt",
         ),
         "wb",
     ) as handle:
@@ -358,34 +364,51 @@ def main(args):
             args.color_path,
             args.explainer,
             args.target,
-            f"{args.target}_seed_{args.seed}_{args.explainer}_test.pt",
+            f"{args.target}_seed_{args.seed}_{train_params}_test.pt",
         ),
         "wb",
     ) as handle:
         dill.dump(test_colors, handle)
-        
-        
+
     accs_train, f1s_train = get_scores(trainval_dataset, train_colors, set="train")
     accs_test, f1s_test = get_scores(test_dataset, test_colors, set="test")
 
-    global_dir_train = get_global_directions(trainval_dataset, train_colors, set="train")
+    global_dir_train = get_global_directions(
+        trainval_dataset, train_colors, set="train"
+    )
     global_dir_test = get_global_directions(test_dataset, test_colors, set="test")
 
     local_dir_train = get_local_directions(trainval_dataset, train_colors, set="train")
     local_dir_test = get_local_directions(test_dataset, test_colors, set="test")
 
     os.makedirs(args.result_path, exist_ok=True)
-    global_res_path = osp.join(args.result_path, f"attr_scores_{train_params}.csv")
-    
-    
-    accs_train, f1s_train = np.nanmean(accs_train, axis=0).tolist(), np.nanmean(f1s_train, axis=0).tolist()
-    accs_test, f1s_test = np.nanmean(accs_test, axis=0).tolist(), np.nanmean(f1s_test, axis=0).tolist()
-    global_dir_train, global_dir_test = np.nanmean(global_dir_train, axis=0).tolist(), np.nanmean(global_dir_test, axis=0).tolist()
-    local_dir_train, local_dir_test = np.nanmean(local_dir_train, axis=0).tolist(), np.nanmean(local_dir_test, axis=0).tolist()
-    n_mcs_train, n_mcs_test = np.sum(get_mcs(trainval_dataset), axis=0).tolist(), np.sum(get_mcs(test_dataset), axis=0).tolist()
+    global_res_path = osp.join(
+        args.result_path, f"attr_scores_{train_params}_{args.target}.csv"
+    )
+
+    accs_train, f1s_train = (
+        np.nanmean(accs_train, axis=0).tolist(),
+        np.nanmean(f1s_train, axis=0).tolist(),
+    )
+    accs_test, f1s_test = (
+        np.nanmean(accs_test, axis=0).tolist(),
+        np.nanmean(f1s_test, axis=0).tolist(),
+    )
+    global_dir_train, global_dir_test = (
+        np.nanmean(global_dir_train, axis=0).tolist(),
+        np.nanmean(global_dir_test, axis=0).tolist(),
+    )
+    local_dir_train, local_dir_test = (
+        np.nanmean(local_dir_train, axis=0).tolist(),
+        np.nanmean(local_dir_test, axis=0).tolist(),
+    )
+    n_mcs_train, n_mcs_test = (
+        np.sum(get_mcs(trainval_dataset), axis=0).tolist(),
+        np.sum(get_mcs(test_dataset), axis=0).tolist(),
+    )
 
     # with warnings.catch_warnings():
-        # warnings.simplefilter("ignore", category=RuntimeWarning)
+    # warnings.simplefilter("ignore", category=RuntimeWarning)
 
     res_dict = {
         "target": [args.target] * 10,
@@ -406,9 +429,9 @@ def main(args):
         "local_dir_test": local_dir_test,
         "mcs": [50, 55, 60, 65, 70, 75, 80, 85, 90, 95],
         "n_mcs_train": n_mcs_train,
-        "n_mcs_test": n_mcs_test
+        "n_mcs_test": n_mcs_test,
     }
-    df = pd.DataFrame({key:pd.Series(value) for key, value in res_dict.items()})
+    df = pd.DataFrame({key: pd.Series(value) for key, value in res_dict.items()})
     df.to_csv(global_res_path, index=False)
 
 

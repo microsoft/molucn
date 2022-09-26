@@ -94,7 +94,7 @@ def overall_parser():
 
 def main_rf(args):
     set_seed(args.seed)
-
+    train_params = f"None_None_None_None_{args.explainer}"
     # wandb.init(project=f'{train_params}_training', entity='k-amara', name=args.target)
 
     # Check that data exists
@@ -171,7 +171,9 @@ def main_rf(args):
 
     # Save GNN scores
     os.makedirs(args.log_path, exist_ok=True)
-    global_res_path = osp.join(args.log_path, "model_scores_rf.csv")
+    global_res_path = osp.join(
+        args.log_path, f"model_scores_rf_{train_params}_{args.target}.csv"
+    )
     df = pd.DataFrame(
         [
             [
@@ -230,7 +232,7 @@ def main_rf(args):
             args.color_path,
             args.explainer,
             args.target,
-            f"{args.target}_seed_{args.seed}_{args.explainer}_train.pt",
+            f"{args.target}_seed_{args.seed}_{train_params}_train.pt",
         ),
         "wb",
     ) as handle:
@@ -240,7 +242,7 @@ def main_rf(args):
             args.color_path,
             args.explainer,
             args.target,
-            f"{args.target}_seed_{args.seed}_{args.explainer}_test.pt",
+            f"{args.target}_seed_{args.seed}_{train_params}_test.pt",
         ),
         "wb",
     ) as handle:
@@ -256,8 +258,10 @@ def main_rf(args):
     local_dir_test = get_local_directions(test_dataset, test_colors, set="test")
 
     os.makedirs(args.result_path, exist_ok=True)
-    global_res_path = osp.join(args.result_path, f"attr_scores_rf.csv")
-
+    global_res_path = osp.join(
+        args.result_path, f"attr_scores_{train_params}_{args.target}.csv"
+    )
+    print("Saving scores at...", global_res_path)
     # with warnings.catch_warnings():
     # warnings.simplefilter("ignore", category=RuntimeWarning)
 
@@ -281,6 +285,7 @@ def main_rf(args):
 
     df = pd.DataFrame({key: pd.Series(value) for key, value in res_dict.items()})
     df.to_csv(global_res_path, index=False)
+    print("scores: ", df)
 
 
 if __name__ == "__main__":

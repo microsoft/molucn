@@ -2,8 +2,7 @@
 
 import torch
 from torch_geometric.data import Data
-
-from feat_attribution.explainer_base import Explainer
+from xaikenza.feat_attribution.explainer_base import Explainer
 
 
 class GradCAM(Explainer):
@@ -22,7 +21,12 @@ class GradCAM(Explainer):
     Localization" (https://arxiv.org/abs/1610.02391).
     """
 
-    def __init__(self, device: torch.device, model: torch.nn.Module, last_layer_only: bool = False):
+    def __init__(
+        self,
+        device: torch.device,
+        model: torch.nn.Module,
+        last_layer_only: bool = False,
+    ):
         """GradCAM constructor.
         Args:
           last_layer_only: If to use only the last layer activations, if not will

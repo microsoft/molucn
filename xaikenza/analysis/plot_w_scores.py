@@ -1,27 +1,29 @@
 # %%
 import os
 import os.path as osp
-import matplotlib as mpl
+import matplotlib
 #matplotlib.use('agg')
 import matplotlib.pyplot as plt
-import pandas as pd
 import numpy as np
+import pandas as pd
 import seaborn as sns
+import matplotlib.style
+import matplotlib as mpl
+mpl.style.use('classic')
+#matplotlib.rc('font', family='sans-serif') 
+matplotlib.rc('text', usetex='True')
 from collections import Counter
 sns.set_theme(style="whitegrid")
-
-mpl.rcParams["figure.facecolor"] = "white"
-
-par_dir = "/home/t-kenzaamara/molucn"
-
-# Option: plot average or weighted average
+matplotlib.rcParams["figure.facecolor"] = "white"
+par_dir = '/home/t-kenzaamara/molucn'
 
 # %%
 
-sns.set_context("notebook", rc={"legend.fontsize":18, "legend.title_fontsize":20, 
-                                "axes.titlesize":22,"axes.labelsize":22,
-                               "xtick.labelsize" : 20, "ytick.labelsize" : 20})
+sns.set_context("notebook", rc={"legend.fontsize":26, "legend.title_fontsize":27, 
+                                "axes.titlesize":27,"axes.labelsize":27,
+                               "xtick.labelsize" : 23, "ytick.labelsize" : 23})
 sns.set_style("whitegrid")
+
 # %%
 model_res = pd.read_csv(osp.join(par_dir, f"logs/mcs_model_scores_350.csv"))
 attr_res = pd.read_csv(osp.join(par_dir, f"results/mcs_attr_scores_350.csv"))
@@ -43,8 +45,6 @@ mcs_stats = pd.merge(df, df_full, on='mcs', how='left', suffixes=('', '_full'))
 mcs_stats['w_train'] = mcs_stats['n_mcs_train']/mcs_stats['n_mcs_train_full']
 mcs_stats['w_test'] = mcs_stats['n_mcs_test']/mcs_stats['n_mcs_test_full']
 mcs_stats
-# %%
-mcs_stats.groupby('mcs').sum()
 #%%
 w_attr_res = pd.merge(attr_res,mcs_stats, on=['mcs','target'], how='left', suffixes=('', '_full'))
 print(w_attr_res)
@@ -92,8 +92,8 @@ sns.lineplot(
     palette=dict_color,
     ax=axs[0]
 )
-axs[0].set_title("Loss = MSE", pad=10)
-axs[0].set_ylabel("Weighted color agreement (%)", labelpad=10)
+axs[0].set_title(r'$\mathcal{L}_{\mathrm{MSE}}$', pad=10)
+axs[0].set_ylabel("Weighted color agreement (\%)", labelpad=10)
 axs[0].set(xlabel=None)
 
 sns.lineplot(
@@ -110,7 +110,7 @@ sns.lineplot(
     palette=dict_color,
     ax=axs[1]
 )
-axs[1].set_title("Loss = MSE + AC", pad=10)
+axs[1].set_title(r'$\mathcal{L}_{\mathrm{MSE+AC}}$', pad=10)
 axs[1].set(xlabel=None)
 
 g = sns.lineplot(
@@ -126,7 +126,7 @@ g = sns.lineplot(
     palette=dict_color,
     ax=axs[2]
 )
-axs[2].set_title("Loss = MSE + UCN", pad=10)
+axs[2].set_title(r'$\mathcal{L}_{\mathrm{MSE+UCN}}$', pad=10)
 axs[2].set(xlabel=None)
 #axs[2].set_xlabel("Minimum shared MCS atoms among pairs (%)")
 legend = plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', handlelength=1, frameon=False, borderaxespad=0, title='Feature Attribution')
@@ -135,7 +135,8 @@ for t in legend.get_texts():
 for i in range(len(order_items.keys())):
     legend.get_lines()[i].set_linewidth(6)
 
-fig.text(0.45, -0.04, "Minimum shared MCS atoms among pairs (%)", ha='center', fontsize=22)
+fig.text(0.45, -0.04, "Minimum shared MCS atoms among testing pairs (\%)", ha='center', fontsize=27)
+plt.xlim(48,97)
 plt.tight_layout()
 plt.savefig(os.path.join(par_dir, 'figures/weighted_acc_test.pdf'), bbox_inches="tight")
 
@@ -160,8 +161,8 @@ sns.lineplot(
     palette=dict_color,
     ax=axs[0]
 )
-axs[0].set_title("Loss = MSE", pad=10)
-axs[0].set_ylabel("Weighted color agreement (%)", labelpad=10)
+axs[0].set_title(r'$\mathcal{L}_{\mathrm{MSE}}$', pad=10)
+axs[0].set_ylabel("Weighted color agreement (\%)", labelpad=10)
 axs[0].set(xlabel=None)
 
 sns.lineplot(
@@ -178,7 +179,7 @@ sns.lineplot(
     palette=dict_color,
     ax=axs[1]
 )
-axs[1].set_title("Loss = MSE + AC", pad=10)
+axs[1].set_title(r'$\mathcal{L}_{\mathrm{MSE+AC}}$', pad=10)
 axs[1].set(xlabel=None)
 
 g = sns.lineplot(
@@ -194,7 +195,7 @@ g = sns.lineplot(
     palette=dict_color,
     ax=axs[2]
 )
-axs[2].set_title("Loss = MSE + UCN", pad=10)
+axs[2].set_title(r'$\mathcal{L}_{\mathrm{MSE+UCN}}$', pad=10)
 axs[2].set(xlabel=None)
 
 legend = plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', handlelength=1, frameon=False, borderaxespad=0, title='Feature Attribution')
@@ -203,8 +204,8 @@ for t in legend.get_texts():
 for i in range(len(order_items.keys())):
     legend.get_lines()[i].set_linewidth(6)
 
-fig.text(0.45, -0.04, "Minimum shared MCS atoms among pairs (%)", ha='center', fontsize=22)
-
+fig.text(0.45, -0.04, "Minimum shared MCS atoms among training pairs (\%)", ha='center', fontsize=27)
+plt.xlim(48,97)
 plt.tight_layout()
 plt.savefig(os.path.join(par_dir, 'figures/weighted_acc_train.pdf'), bbox_inches="tight")
 
@@ -231,8 +232,8 @@ sns.lineplot(
     palette=dict_color,
     ax=axs[0]
 )
-axs[0].set_title("Loss = MSE", pad=10)
-axs[0].set_ylabel("Weighted global direction (%)", labelpad=10)
+axs[0].set_title(r'$\mathcal{L}_{\mathrm{MSE}}$', pad=10)
+axs[0].set_ylabel("Weighted global direction (\%)", labelpad=10)
 #axs[0].set_xlabel("Minimum shared MCS atoms among pairs (%)")
 axs[0].set(xlabel=None)
 
@@ -250,7 +251,7 @@ sns.lineplot(
     palette=dict_color,
     ax=axs[1]
 )
-axs[1].set_title("Loss = MSE + AC", pad=10)
+axs[1].set_title(r'$\mathcal{L}_{\mathrm{MSE+AC}}$', pad=10)
 axs[1].set(xlabel=None)
 #axs[1].set_xlabel("Minimum shared MCS atoms among pairs (%)")
 
@@ -267,7 +268,7 @@ g = sns.lineplot(
     palette=dict_color,
     ax=axs[2]
 )
-axs[2].set_title("Loss = MSE + UCN", pad=10)
+axs[2].set_title(r'$\mathcal{L}_{\mathrm{MSE+UCN}}$', pad=10)
 axs[2].set(xlabel=None)
 #axs[2].set_xlabel("Minimum shared MCS atoms among pairs (%)")
 legend = plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', handlelength=1, frameon=False, borderaxespad=0, title='Feature Attribution')
@@ -277,8 +278,9 @@ for i in range(len(order_items.keys())):
     legend.get_lines()[i].set_linewidth(6)
 
 #plt.xlabel("Minimum shared MCS atoms among pairs (%)")
-fig.text(0.45, -0.04, "Minimum shared MCS atoms among pairs (%)", ha='center', fontsize=22)
+fig.text(0.45, -0.04, "Minimum shared MCS atoms among testing pairs (\%)", ha='center', fontsize=27)
 #fig.suptitle("Global direction vs MCS - Test", fontsize=32)
+plt.xlim(48,97)
 plt.tight_layout()
 plt.savefig(os.path.join(par_dir, 'figures/weighted_gdir_test.pdf'), bbox_inches="tight")
 
@@ -302,8 +304,8 @@ sns.lineplot(
     palette=dict_color,
     ax=axs[0]
 )
-axs[0].set_title("Loss = MSE", pad=10)
-axs[0].set_ylabel("Weighted global direction (%)", labelpad=10)
+axs[0].set_title(r'$\mathcal{L}_{\mathrm{MSE}}$', pad=10)
+axs[0].set_ylabel("Weighted global direction (\%)", labelpad=10)
 axs[0].set(xlabel=None)
 
 sns.lineplot(
@@ -320,7 +322,7 @@ sns.lineplot(
     palette=dict_color,
     ax=axs[1]
 )
-axs[1].set_title("Loss = MSE + AC", pad=10)
+axs[1].set_title(r'$\mathcal{L}_{\mathrm{MSE+AC}}$', pad=10)
 axs[1].set(xlabel=None)
 
 g = sns.lineplot(
@@ -336,7 +338,7 @@ g = sns.lineplot(
     palette=dict_color,
     ax=axs[2]
 )
-axs[2].set_title("Loss = MSE + UCN", pad=10)
+axs[2].set_title(r'$\mathcal{L}_{\mathrm{MSE+UCN}}$', pad=10)
 axs[2].set(xlabel=None)
 
 legend = plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', handlelength=1, frameon=False, borderaxespad=0, title='Feature Attribution')
@@ -345,8 +347,8 @@ for t in legend.get_texts():
 for i in range(len(order_items.keys())):
     legend.get_lines()[i].set_linewidth(6)
 
-fig.text(0.45, -0.04, "Minimum shared MCS atoms among pairs (%)", ha='center', fontsize=22)
-
+fig.text(0.45, -0.04, "Minimum shared MCS atoms among training pairs (\%)", ha='center', fontsize=27)
+plt.xlim(48,97)
 plt.tight_layout()
 plt.savefig(os.path.join(par_dir, 'figures/weighted_gdir_train.pdf'), bbox_inches="tight")
 # %%

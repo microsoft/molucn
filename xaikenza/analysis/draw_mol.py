@@ -16,7 +16,7 @@ plt.rcParams["figure.dpi"] = 600
 from rdkit.Chem.rdchem import Mol
 from reportlab.graphics import renderPDF
 from svglib.svglib import svg2rlg
-par_dir = "/home/t-kenzaamara/internship2022"
+par_dir = "/home/t-kenzaamara/molucn"
 
 def draw_mol2pdf(mol: Mol, filename: str= "draw.pdf", path: Union[str, os.PathLike]= "./"):
     cwd = Path.cwd()

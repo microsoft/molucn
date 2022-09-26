@@ -14,7 +14,7 @@ sns.set_theme(style="whitegrid")
 
 matplotlib.rcParams["figure.facecolor"] = "white"
 
-par_dir = "/home/t-kenzaamara/internship2022"
+par_dir = "/home/t-kenzaamara/molucn"
 import scipy.stats as stats
 import shutil
 

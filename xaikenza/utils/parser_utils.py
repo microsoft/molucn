@@ -1,9 +1,10 @@
 import argparse
 
+from xaikenza.utils.path import COLOR_DIR, DATA_DIR, LOG_DIR, MODEL_DIR, RESULT_DIR
+
+
 # Parse train only at the beginning in train_gnn.py
 # Shared parse for explain.py and train_gnn.py
-
-
 def overall_parser():
     parser = argparse.ArgumentParser(description="Train GNN Model")
 
@@ -19,24 +20,31 @@ def overall_parser():
 
     # Saving paths
     parser.add_argument(
-        "--data_path", nargs="?", default="data", help="Input data path."
+        "--data_path", nargs="?", default=DATA_DIR, help="Input data path."
     )
     parser.add_argument(
         "--model_path",
         nargs="?",
-        default="model",
+        default=MODEL_DIR,
         help="path for saving trained model.",
     )
     parser.add_argument(
         "--log_path",
         nargs="?",
-        default="logs",
+        default=LOG_DIR,
         help="path for saving gnn scores (rmse, pcc).",
     )
     parser.add_argument(
+        "-color_path",
+        nargs="?",
+        default=COLOR_DIR,
+        help="path for saving node colors.",
+    )
+
+    parser.add_argument(
         "--result_path",
         nargs="?",
-        default="results",
+        default=RESULT_DIR,
         help="path for saving the feature attribution scores (accs, f1s).",
     )
 
@@ -75,8 +83,7 @@ def overall_parser():
         default=1.0,
         help="Hyperparameter determining the importance of UCN Loss",
     )
-    
-    
+
     # Train test val split
     parser.add_argument(
         "--test_set_size", type=float, default=0.2, help="test set size (ratio)"
@@ -84,9 +91,18 @@ def overall_parser():
     parser.add_argument(
         "--val_set_size", type=float, default=0.1, help="validation set size (ratio)"
     )
-    
+
+    # GNN training parameters
+    parser.add_argument("--epoch", type=int, default=200, help="Number of epoch.")
+    parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate.")
+    parser.add_argument("--batch_size", type=int, default=16, help="Batch size.")
     parser.add_argument(
-        "--explainer", type=str, default='gradinput', help="Feature attribution method"
-    ) # gradinput, ig
+        "--verbose", type=int, default=10, help="Interval of evaluation."
+    )
+    parser.add_argument("--num_workers", type=int, default=0, help="number of workers")
+
+    parser.add_argument(
+        "--explainer", type=str, default="gradinput", help="Feature attribution method"
+    )  # gradinput, ig
 
     return parser
