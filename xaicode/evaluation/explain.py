@@ -5,11 +5,11 @@ import os.path as osp
 import dill
 import numpy as np
 import pandas as pd
-from xaikenza.evaluation.explain_color import get_scores
-from xaikenza.evaluation.explain_direction_global import get_global_directions
-from xaikenza.evaluation.explain_direction_local import get_local_directions
-from xaikenza.utils.parser_utils import overall_parser
-from xaikenza.utils.utils import get_mcs, set_seed
+from xaicode.evaluation.explain_color import get_scores
+from xaicode.evaluation.explain_direction_global import get_global_directions
+from xaicode.evaluation.explain_direction_local import get_local_directions
+from xaicode.utils.parser_utils import overall_parser
+from xaicode.utils.utils import get_mcs, set_seed
 
 
 def get_scores_from_colors(args):

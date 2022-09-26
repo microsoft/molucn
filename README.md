@@ -1,15 +1,24 @@
 # Introduction 
 TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+This is the official code for [A substructure-aware loss for feature attribution in drug discovery](). 
 
 # Getting Started
 TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
 1.	Installation process
+
+`conda env update -n base --file environment.yaml`
+
 2.	Software dependencies
 3.	Latest releases
 4.	API references
 
 # Build and Test
 TODO: Describe and show how to build your code and run the tests. 
+To train the GNN model and run feature attribution for one target protein 1D3G-BRE, run:
+`python xaicode/main.py --target 1D3G-BRE --method [diff, gradinput, ig, cam, gradcam]`
+
+To run Random Forest and use it to assign feature importance, run:
+`python xaicode/main_rf.py --target 1D3G-BRE`
 
 # Contribute
 TODO: Explain how other users and developers can contribute to make your code better. 

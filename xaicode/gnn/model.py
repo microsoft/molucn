@@ -16,8 +16,8 @@ from torch_geometric.nn import (
     global_max_pool,
     global_mean_pool,
 )
-from xaikenza.gnn.aggregation import AttentionalAggregation
-from xaikenza.utils.train_utils import overload
+from xaicode.gnn.aggregation import AttentionalAggregation
+from xaicode.utils.train_utils import overload
 
 
 class GNN(torch.nn.Module):

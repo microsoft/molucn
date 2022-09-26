@@ -1,6 +1,6 @@
 import argparse
 
-from xaikenza.utils.path import COLOR_DIR, DATA_DIR, LOG_DIR, MODEL_DIR, RESULT_DIR
+from xaicode.utils.path import COLOR_DIR, DATA_DIR, LOG_DIR, MODEL_DIR, RESULT_DIR
 
 
 # Parse train only at the beginning in train_gnn.py

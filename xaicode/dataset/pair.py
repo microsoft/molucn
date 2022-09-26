@@ -12,10 +12,10 @@ import torch.utils.data
 from sklearn.model_selection import train_test_split
 from torch import Tensor
 from torch_geometric.data import HeteroData
-from xaikenza.dataset.featurization import (
+from xaicode.dataset.featurization import (
     create_pytorch_geometric_data_list_from_smiles_and_labels,
 )
-from xaikenza.utils.parser_utils import overall_parser
+from xaicode.utils.parser_utils import overall_parser
 
 IndexType = Union[slice, Tensor, np.ndarray, Sequence]
 

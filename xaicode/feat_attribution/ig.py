@@ -4,7 +4,7 @@ from copy import deepcopy
 import networkx as nx
 import torch
 from torch_geometric.data import Data
-from xaikenza.feat_attribution.explainer_base import Explainer
+from xaicode.feat_attribution.explainer_base import Explainer
 
 
 def gen_steps(graph, n_steps: int, version=2):

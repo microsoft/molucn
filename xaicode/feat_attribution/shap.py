@@ -5,7 +5,7 @@ import numpy as np
 import scipy.special
 import torch
 from torch_geometric.data import Data
-from xaikenza.feat_attribution.explainer_base import Explainer
+from xaicode.feat_attribution.explainer_base import Explainer
 
 
 def normalize(a, min, max):

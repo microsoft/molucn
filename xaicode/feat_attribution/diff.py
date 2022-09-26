@@ -5,7 +5,7 @@ from typing import List
 
 import torch
 from torch_geometric.data import Data
-from xaikenza.feat_attribution.explainer_base import Explainer
+from xaicode.feat_attribution.explainer_base import Explainer
 
 
 class Diff(Explainer):

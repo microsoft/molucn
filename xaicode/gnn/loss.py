@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
-from xaikenza.utils.utils import (
+from xaicode.utils.utils import (
     get_common_nodes,
     get_positions,
     get_substituent_info,

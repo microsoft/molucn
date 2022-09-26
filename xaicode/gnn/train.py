@@ -10,11 +10,11 @@ import wandb
 from sklearn.model_selection import train_test_split
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch_geometric.data import DataLoader
-from xaikenza.dataset.pair import get_num_features
-from xaikenza.gnn.model import GNN
-from xaikenza.utils.parser_utils import overall_parser
-from xaikenza.utils.train_utils import DEVICE, test_epoch, train_epoch  # move to
-from xaikenza.utils.utils import set_seed
+from xaicode.dataset.pair import get_num_features
+from xaicode.gnn.model import GNN
+from xaicode.utils.parser_utils import overall_parser
+from xaicode.utils.train_utils import DEVICE, test_epoch, train_epoch  # move to
+from xaicode.utils.utils import set_seed
 
 print(sys.path)
 

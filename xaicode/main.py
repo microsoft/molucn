@@ -13,20 +13,20 @@ from sklearn.model_selection import train_test_split
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch_geometric.data import DataLoader
 
-from xaikenza.dataset.pair import get_num_features
-from xaikenza.evaluation.explain_color import get_scores
-from xaikenza.evaluation.explain_direction_global import get_global_directions
-from xaikenza.evaluation.explain_direction_local import get_local_directions
-from xaikenza.feat_attribution.cam import CAM
-from xaikenza.feat_attribution.diff import Diff
-from xaikenza.feat_attribution.gradcam import GradCAM
-from xaikenza.feat_attribution.gradinput import GradInput
-from xaikenza.feat_attribution.ig import IntegratedGradient
-from xaikenza.feat_attribution.shap import SHAP
-from xaikenza.gnn.model import GNN
-from xaikenza.utils.parser_utils import overall_parser
-from xaikenza.utils.train_utils import DEVICE, test_epoch, train_epoch  # move to
-from xaikenza.utils.utils import get_mcs, set_seed
+from xaicode.dataset.pair import get_num_features
+from xaicode.evaluation.explain_color import get_scores
+from xaicode.evaluation.explain_direction_global import get_global_directions
+from xaicode.evaluation.explain_direction_local import get_local_directions
+from xaicode.feat_attribution.cam import CAM
+from xaicode.feat_attribution.diff import Diff
+from xaicode.feat_attribution.gradcam import GradCAM
+from xaicode.feat_attribution.gradinput import GradInput
+from xaicode.feat_attribution.ig import IntegratedGradient
+from xaicode.feat_attribution.shap import SHAP
+from xaicode.gnn.model import GNN
+from xaicode.utils.parser_utils import overall_parser
+from xaicode.utils.train_utils import DEVICE, test_epoch, train_epoch  # move to
+from xaicode.utils.utils import get_mcs, set_seed
 
 os.environ["WANDB_SILENT"] = "true"
 

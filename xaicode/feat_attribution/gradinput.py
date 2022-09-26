@@ -2,7 +2,7 @@
 import torch
 from torch.autograd import Variable
 from torch_geometric.data import Data
-from xaikenza.feat_attribution.explainer_base import Explainer
+from xaicode.feat_attribution.explainer_base import Explainer
 
 
 class GradInput(Explainer):

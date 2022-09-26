@@ -7,7 +7,7 @@ from typing import List
 
 import numpy as np
 import pandas as pd
-from xaikenza.utils.parser_utils import overall_parser
+from xaicode.utils.parser_utils import overall_parser
 
 NO_VALUES_AT = [28, 269, 346, 600, 608, 655]
 

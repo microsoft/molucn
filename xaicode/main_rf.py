@@ -9,12 +9,12 @@ import pandas as pd
 from rdkit.Chem import MolFromSmiles
 from sklearn.ensemble import RandomForestRegressor
 
-from xaikenza.evaluation.explain_color import get_scores
-from xaikenza.evaluation.explain_direction_global import get_global_directions
-from xaikenza.evaluation.explain_direction_local import get_local_directions
-from xaikenza.utils.parser_utils import overall_parser_rf
-from xaikenza.utils.rf_utils import diff_mask, featurize_ecfp4
-from xaikenza.utils.utils import get_mcs, set_seed
+from xaicode.evaluation.explain_color import get_scores
+from xaicode.evaluation.explain_direction_global import get_global_directions
+from xaicode.evaluation.explain_direction_local import get_local_directions
+from xaicode.utils.parser_utils import overall_parser_rf
+from xaicode.utils.rf_utils import diff_mask, featurize_ecfp4
+from xaicode.utils.utils import get_mcs, set_seed
 
 os.environ["WANDB_SILENT"] = "true"
 N_TREES = 1000

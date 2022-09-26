@@ -5,7 +5,7 @@ import pandas as pd
 print(os.getcwd())
 import sys
 sys.path.append('/home/t-kenzaamara/molucn/')
-from xaikenza.utils.utils import read_list_targets
+from xaicode.utils.utils import read_list_targets
 par_dir = '/home/t-kenzaamara/molucn/'
 
 def read_list_targets(n_targets):
