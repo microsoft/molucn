@@ -1,10 +1,17 @@
 # Introduction 
 
 This is the official code for [A substructure-aware loss for feature attribution in drug discovery](). 
+Compound property predictions is an important task for ML in drug discovery. The past few years, GNN models have been used to predict the activity of ligands towards protein targets. But there is a need for explainability: we want to know what atoms in the molecule are responsible for the compound property predictions.
+We usually use feature attribution methods that color atoms, namely assign positive or negative weights to important atoms to account for their contribution in the compound property prediction. However, recent GNN explainability methods have proven less performant than the simple Random Forest masking strategy which estimates atom contribution as the difference in prediction after the bits of the atom in the molecule fingerprint are removed.       
+We propose to improve the gradient-based GNN feature attribution methods by modifying the training optimization objective of GNNs to specifically account for common substructures of pairs of related compounds.
+
+
 
 # Getting Started
 
 1.	Installation process
+
+We recommend the [conda](https://docs.conda.io/en/latest/miniconda.html) Python package manager, and while an GPU is technically not required to run the models and feature attribution methods reported here, it is heavily encouraged. Furthermore, the code has only been tested under Linux. Make a new environment with the provided environment.yml file:
 
 `conda env create --name xaienv --file=environment.yaml`
 
@@ -33,12 +40,17 @@ The data is composed of subfolders, each contaning one congeneric series (for a 
 
 An explanation of each file is provided below:
 
-- `1D3G-BRE_heterodata_list.pt`: dataset with all pairs of ligands saved as `torch_geometric.data.HeteroData` object with information containing the smiles, the true colorings, the ligands activities, and the molecule structure in a `torch_geometric.data.Data` object.
+- `1D3G-BRE_heterodata_list.pt`: dataset with all pairs of ligands saved as `torch_geometric.data.HeteroData` objects with information containing the smiles, the true colorings, the ligands activities, the molecule structures in a `torch_geometric.data.Data` objects and the mcs boolean list indicating if the pair common substructure represents at least 50, 55, 60, 65, 70, 75, 80, 85, 90, 95% of the atoms. 
 - `1D3G-BRE_seed_1337_info.txt`: text file containing information on the congeneric series: number of different ligands/compounds, number of pairs, number of training and testing pairs after 1. splitting the compounds in training and testing sets, 2. keeping pairs with no overlap, 3. rebalancing the training and testing pairs to have a 80/20 ratio.
-- `1D3G-BRE_seed_1337_stats.csv`
+- `1D3G-BRE_seed_1337_stats.csv`: summarizes the previous .txt file into a .csv file to facilitate information extraction.
+- `1D3G-BRE_seed_1337_test.pt`: contains the testing pairs saved as `torch_geometric.data.HeteroData` objects obtained after 1. test/train compounds split, 2. pairs that conatin only testing compounds, 3. rebalancing to get a 80/20 ratio training/testing pairs.
+- `1D3G-BRE_seed_1337_train.pt`: contains the training pairs saved as `torch_geometric.data.HeteroData` objects obtained after 1. test/train compounds split, 2. pairs that conatin only training compounds, 3. rebalancing to get a 80/20 ratio training/testing pairs.
 
+All the .pt files can be read with the Python [pickle](https://docs.python.org/3/library/pickle.html) module or its extension the Python [dill](https://pypi.org/project/dill/) module.
 
 # Code architecture
+
+All results reported in the manuscript can be reproduced with the accompanying code:
 
 
 ```
@@ -109,12 +121,3 @@ To reproduce the results for the 350 protein targets:
 - RF masking (Sheridan baseline):
 
 `bash main_rf.sh`
-
-
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
-
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
