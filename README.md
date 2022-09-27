@@ -12,9 +12,13 @@ This is the official code for [A substructure-aware loss for feature attribution
 
 2. Load the data
 
+Download the data with 350 protein targets split into training and testing pairs from [here]("https://figshare.com/download) (~26GB, when uncompressed):
+
 `wget -O data.tar.gz "https://figshare.com/download?path=%2F&files=data.tar.gz"`
 
 `tar -xf data.tar.gz`
+
+The data is composed of subfolders, each contaning one congeneric series (for a target protein) considered in the benchmark. Subfolders have the following structure:
 
 
 ```
@@ -26,6 +30,13 @@ This is the official code for [A substructure-aware loss for feature attribution
 ├── 1D3G-BRE_seed_1337_test.pt
 └── 1D3G-BRE_seed_1337_train.pt
 ```
+
+An explanation of each file is provided below:
+
+- `1D3G-BRE_heterodata_list.pt`: dataset with all pairs of ligands saved as `torch_geometric.data.HeteroData` object with information containing the smiles, the true colorings, the ligands activities, and the molecule structure in a `torch_geometric.data.Data` object.
+- `1D3G-BRE_seed_1337_info.txt`: text file containing information on the congeneric series: number of different ligands/compounds, number of pairs, number of training and testing pairs after 1. splitting the compounds in training and testing sets, 2. keeping pairs with no overlap, 3. rebalancing the training and testing pairs to have a 80/20 ratio.
+- `1D3G-BRE_seed_1337_stats.csv`
+
 
 # Code architecture
 
@@ -81,9 +92,11 @@ The atom coloring returned by the feature attribution method are saved in ./colo
 ## Test 1 protein target: 1D3G-BRE
 
 To train the GNN model and run feature attribution for one target protein 1D3G-BRE, run:
+
 `python xaicode/main.py --target 1D3G-BRE --method [diff, gradinput, ig, cam, gradcam]`
 
 To run Random Forest and use it to assign feature importance, run:
+
 `python xaicode/main_rf.py --target 1D3G-BRE`
 
 ## Test on 350 protein targets
