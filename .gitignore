@@ -141,6 +141,10 @@ figures/
 logs/
 results/
 
+# Files
+xaicode/feat_attribution/shap.py
+xaicode/utils/amlt_utils.py
+
 # Data
 *.pt
 *.json
