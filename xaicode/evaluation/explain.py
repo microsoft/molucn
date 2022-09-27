@@ -101,7 +101,7 @@ def get_scores_from_colors(args):
     df.to_csv(global_res_path, index=False)
     print("scores: ", df)
 
-    attr_path = osp.join(args.result_path, "mcs_attr_scores_350.csv")
+    attr_path = osp.join(args.result_path, "attr_scores_350.csv")
     if os.path.isfile(attr_path):
         df_all = pd.read_csv(attr_path)
         df_all = pd.concat([df_all, df], axis=0)

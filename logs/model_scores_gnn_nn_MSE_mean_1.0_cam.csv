@@ -1,2 +1,0 @@
-target,seed,conv,pool,loss,lambda1,explainer,rmse_test,pcc_test
-1D3G-BRE,1337,nn,mean,MSE,1.0,cam,4.366439342498779,0.7462693196319594

@@ -322,6 +322,6 @@ if __name__ == "__main__":
     parser = overall_parser()
     args = parser.parse_args()
 
-    for LOSS in ["MSE", "MSE+AC", "MSE+UCN"]:
-        args.loss = LOSS
+    for loss in ["MSE", "MSE+AC", "MSE+UCN"]:
+        args.loss = loss
         main(args)
