@@ -7,11 +7,13 @@ This is the official code for [A substructure-aware loss for feature attribution
 1.	Installation process
 
 `conda env create --name xaienv --file=environment.yaml`
+
 `conda activate xaicode`
 
 2. Load the data
 
 `wget -O data.tar.gz "https://figshare.com/download?path=%2F&files=data.tar.gz"`
+
 `tar -xf data.tar.gz`
 
 
@@ -27,6 +29,9 @@ This is the official code for [A substructure-aware loss for feature attribution
 
 # Code architecture
 
+
+```
+(xaienv):~/molucn/xaicode$ tree
 .
 ├── __init__.py
 ├── dataset
@@ -64,6 +69,7 @@ This is the official code for [A substructure-aware loss for feature attribution
     ├── rf_utils.py
     ├── train_utils.py
     └── utils.py
+```
 
 # Build and Test
 
