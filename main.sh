@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LIST_TARGETS=`cat data/list_targets_350.txt`;
+LIST_TARGETS=`cat data/list_targets_20.txt`;
 
 echo $LIST_TARGETS;
 echo "explainer: $1";

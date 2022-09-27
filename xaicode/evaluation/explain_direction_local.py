@@ -1,7 +1,7 @@
 from typing import List, Tuple
 
 import numpy as np
-from torch.geometric import HeteroData
+from torch_geometric.data import HeteroData
 from xaicode.utils.utils import get_common_nodes, get_positions, get_substituents
 
 EPS_ZERO = 1e-8

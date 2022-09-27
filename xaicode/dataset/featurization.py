@@ -8,7 +8,7 @@ import torch
 
 # RDkit
 from rdkit import Chem
-from Chem.rdchem import Atom, Bond
+from rdkit.Chem.rdchem import Atom, Bond
 from rdkit.Chem.rdmolops import GetAdjacencyMatrix
 from torch_geometric.data import Data
 
