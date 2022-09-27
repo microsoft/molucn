@@ -138,11 +138,14 @@ data/
 amlt/
 test/
 figures/
+logs/
+results/
 
 # Data
 *.pt
 *.json
 *.txt
+*.csv
 
 # Amlt
 .amltignore
