@@ -1,18 +1,29 @@
 # Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
-
 
 This is the official code for [A substructure-aware loss for feature attribution in drug discovery](). 
 
 # Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
+
 1.	Installation process
 
 `conda env create --name xaienv --file=environment.yaml`
+`conda activate xaicode`
 
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+2. Load the data
+
+`wget -O data.tar.gz "https://figshare.com/download?path=%2F&files=data.tar.gz"`
+`tar -xf data.tar.gz`
+
+
+```
+(xaienv):~/molucn/data/1D3G-BRE$ tree
+.
+├── 1D3G-BRE_heterodata_list.pt
+├── 1D3G-BRE_seed_1337_info.txt
+├── 1D3G-BRE_seed_1337_stats.csv
+├── 1D3G-BRE_seed_1337_test.pt
+└── 1D3G-BRE_seed_1337_train.pt
+```
 
 # Code architecture
 
