@@ -29,7 +29,7 @@ class CAM(Explainer):
             model = self.model
 
         tmp_graph = graph.clone().to(self.device)
-
+        
         node_act, edge_act = model.get_gap_activations(tmp_graph)
         weights = model.get_prediction_weights()
         node_weights = torch.einsum("ij,j", node_act, weights)
@@ -39,5 +39,5 @@ class CAM(Explainer):
             e_imp = edge_weights[idx]
             node_weights[graph.edge_index[0, idx]] += e_imp / 2
             node_weights[graph.edge_index[1, idx]] += e_imp / 2
-
+        
         return node_weights.cpu().detach().numpy()

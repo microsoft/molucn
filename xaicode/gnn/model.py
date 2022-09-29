@@ -84,9 +84,7 @@ class GNN(torch.nn.Module):
             self.batch_norms.append(BatchNorm(self.hidden_dim))
             self.relus.append(ReLU())
 
-        self.lin1 = Lin(self.hidden_dim, self.hidden_dim // 2)
-        self.relu = ReLU()
-        self.lin2 = Lin(self.hidden_dim // 2, self.num_classes)
+        self.lin1 = Lin(self.hidden_dim, self.num_classes)
 
         self.pool = pool
         if self.pool == "att":
@@ -209,8 +207,7 @@ class GNN(torch.nn.Module):
             )
         else:
             uncommon_graph_x = self.pool_fn(node_x[bool_mask], batch=None)
-        uncommon_pred = self.relu(self.lin1(uncommon_graph_x))
-        uncommon_pred = self.lin2(uncommon_pred)
+        uncommon_pred = self.lin1(uncommon_graph_x)
         return uncommon_pred
 
     def get_uncommon_graph_rep(self, data: torch.Tensor) -> torch.Tensor:
@@ -242,8 +239,7 @@ class GNN(torch.nn.Module):
         else:
             uncommon_graph_x = self.pool_fn(node_x[bool_mask], data.batch[bool_mask])
 
-        uncommon_pred = self.relu(self.lin1(uncommon_graph_x))
-        uncommon_pred = self.lin2(uncommon_pred)
+        uncommon_pred = self.lin1(uncommon_graph_x)
 
         if masked_bs < bs:
             non_zeros_mask_idx = np.intersect1d(
@@ -257,8 +253,7 @@ class GNN(torch.nn.Module):
 
     def get_pred(self, graph_x):
         """Returns the prediction of the model on a graph embedding after the graph convolutional layers."""
-        pred = self.relu(self.lin1(graph_x))
-        pred = self.lin2(pred)
+        pred = self.lin1(graph_x)
         return pred
 
     def reset_parameters(self):
