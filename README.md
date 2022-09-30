@@ -18,7 +18,7 @@ conda activate molucn
 To reproduce the results presented in the paper, download the following compressed data tarball from [here]("https://figshare.com/download) (~26GB, when uncompressed):
 
 ```bash
-wget -O data.tar.gz "https://figshare.com/download?path=%2F&files=data.tar.gz"
+wget -O data.tar.gz "https://figshare.com/articles/dataset/molucn-data/21215477?file=37624043"
 tar -xf data.tar.gz
 ```
 
