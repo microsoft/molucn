@@ -1,11 +1,6 @@
 # Introduction 
 
-This is the official code for [A substructure-aware loss for feature attribution in drug discovery](). 
-Compound property predictions is an important task for ML in drug discovery. The past few years, GNN models have been used to predict the activity of ligands towards protein targets. But there is a need for explainability: we want to know what atoms in the molecule are responsible for the compound property predictions.
-We usually use feature attribution methods that color atoms, namely assign positive or negative weights to important atoms to account for their contribution in the compound property prediction. However, recent GNN explainability methods have proven less performant than the simple Random Forest masking strategy which estimates atom contribution as the difference in prediction after the bits of the atom in the molecule fingerprint are removed.       
-We propose to improve the gradient-based GNN feature attribution methods by modifying the training optimization objective of GNNs to specifically account for common substructures of pairs of related compounds.
-
-
+Supporting code and analyses for "A substructure-aware loss for feature attribution in drug discovery", as submitted to the NeurIPS 2022 AI4Science [workshop](https://ai4sciencecommunity.github.io/).
 
 # Getting Started
 
