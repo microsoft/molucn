@@ -87,19 +87,22 @@ with open(train_data_path, "rb") as fp:
     train_colors = dill.load(fp)
 train_colors
 # %%
-pair = train_pairs[3]
+pair = train_pairs[4]
 c_i = pair.data_i
 c_j = pair.data_j
 c_i.x.size()
 #%%
-colors = train_colors[3]
+colors = train_colors[4]
 colors_i = colors[0]
 colors_j = colors[1]
 len(colors_i)
 # %%
 mi = Chem.MolFromSmiles(c_i.smiles)
 mj = Chem.MolFromSmiles(c_j.smiles)
-mi
+template = Chem.MolFromSmiles('O=C(O)c1c(O)c(-c2ccccc2)nc2ccccc12')
+AllChem.Compute2DCoords(template)
+AllChem.GenerateDepictionMatching2DStructure(mi, template)
+AllChem.GenerateDepictionMatching2DStructure(mj, template)
 
 # %%
 
@@ -127,36 +130,20 @@ COLOR_NORMALIZERS = {
 }
 
 
-def _get_index_and_colors(values, objects, predicate, color_mapper):
-    """
-    Get index and RGB colors from a color map using a rule.
-    
-    The predicate acts on a tuple of (value, object).
-    """
-    indices = []
-    colors = {}
-    for index, value in enumerate(
-        map(
-            lambda t: t[0],
-            filter(
-                lambda t: predicate(t),
-                zip(values, objects)
-            )
-        )
-    ):
-        indices.append(index)
-        colors[index] = color_mapper.to_rgba(value)
-    return indices, colors
-
 def get_color_mapper(values):
-    normalize = colors.TwoSlopeNorm(vmin=min(values), vcenter=0, vmax=max(values))
+    if max(values)>np.abs(min(values)):
+        m = max(values)
+    else:
+        m = np.abs(min(values))
+    m=2
+    normalize = colors.TwoSlopeNorm(vmin=-m, vcenter=0, vmax=m)
     color_mapper = cm.ScalarMappable(
         norm=normalize, cmap=CMAP
     )
     return color_mapper
 
 def smiles_attention_to_svg(
-    values, atoms_and_bonds, molecule, color_mapper, file_name,
+    values, atoms_and_bonds, molecule, color_mapper, template, file_name,
     atom_radii=0.5, svg_width=400, svg_height=400,
     color_normalization='linear'
 ):
@@ -183,16 +170,14 @@ def smiles_attention_to_svg(
         #vmax=max(values)
     #)
     # get atom colors
-    _, highlight_atom_colors = _get_index_and_colors(
-        values, atoms_and_bonds,
-        lambda t: t[1] not in NON_ATOM_CHARACTERS,
-        color_mapper
-    )
     highlight_atoms = np.array(atoms_and_bonds).tolist()
+    highlight_atom_colors = {highlight_atoms[i]:color_mapper.to_rgba(value) for i, value in enumerate(values)}
+
     # add coordinates
     Chem.rdDepictor.Compute2DCoords(molecule)
     # draw the molecule
     drawer = rdMolDraw2D.MolDraw2DCairo(svg_width, svg_height)
+    AllChem.GenerateDepictionMatching2DStructure(molecule, template)
     drawer.DrawMolecule(
         molecule,
         highlightAtoms=highlight_atoms,
@@ -202,6 +187,7 @@ def smiles_attention_to_svg(
             for index in highlight_atoms
         }
     )
+    
     drawer.FinishDrawing()
     # return the drawn molecule
     p = drawer.GetDrawingText()
@@ -216,20 +202,20 @@ def smiles_attention_to_svg(
 #smiles_attention_to_svg(colors_j, range(len(c_j.x)), mj, file_name = 'draw_mj.png')
 # %%
 import torch
-np.where(c_i.mask == 1)[0]
-#%%
-bool_mask = torch.BoolTensor(np.where(c_i.mask == 0, 0, 1))
-colors_i[bool_mask]
-
-#%%
-bool_mask = torch.BoolTensor(np.where(c_j.mask == 0, 0, 1))
-colors_j[bool_mask]
 # %%
 color_mapper = get_color_mapper([*colors_i, *colors_j])
-smiles_attention_to_svg(colors_i[torch.BoolTensor(np.where(c_i.mask == 0, 0, 1))], np.where(c_i.mask != 0)[0], mi, color_mapper, file_name = 'draw_mi.png')
-smiles_attention_to_svg(colors_j[torch.BoolTensor(np.where(c_j.mask == 0, 0, 1))], np.where(c_j.mask != 0)[0], mj, color_mapper, file_name = 'draw_mj.png')
+
+template = Chem.MolFromSmiles('O=C(O)c1c(O)c(-c2ccccc2)nc2ccccc12')
+AllChem.Compute2DCoords(template)
+smiles_attention_to_svg(colors_i[torch.BoolTensor(np.where(c_i.mask == 0, 0, 1))], np.where(c_i.mask != 0)[0], mi, color_mapper, template, file_name = 'draw_mi_4.png')
+smiles_attention_to_svg(colors_j[torch.BoolTensor(np.where(c_j.mask == 0, 0, 1))], np.where(c_j.mask != 0)[0], mj, color_mapper, template, file_name = 'draw_mj_4.png')
+
 # %%
-c_j.mask
+template = Chem.MolFromSmiles('O=C(O)c1c(O)c(-c2ccccc2)nc2ccccc12')
+AllChem.Compute2DCoords(template)
+smiles_attention_to_svg(c_i.mask[np.where(c_i.mask !=0)[0]], np.where(c_i.mask != 0)[0], mi, color_mapper, template, file_name = 'draw_mi_true_4.png')
+smiles_attention_to_svg(c_j.mask[np.where(c_j.mask !=0)[0]], np.where(c_j.mask != 0)[0], mj, color_mapper, template, file_name = 'draw_mj_true_4.png')
+
 # %%
 for atom in mi.GetAtoms():
     print('atom idx: ', atom.GetIdx())
@@ -238,7 +224,8 @@ for atom in mi.GetAtoms():
 color_mapper = get_color_mapper([*colors_i, *colors_j])
 # %%
 print(c_i.y, c_j.y)
+print(c_i.mask, c_j.mask)
 print(colors_i[torch.BoolTensor(np.where(c_i.mask == 0, 0, 1))], colors_j[torch.BoolTensor(np.where(c_j.mask == 0, 0, 1))])
 # %%
-color_mapper
+c_i.mask[np.where(c_i.mask !=0)[0]]
 # %%
