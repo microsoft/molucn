@@ -15,7 +15,7 @@ conda activate molucn
 
 ## Prerequisites and data structure
 
-To reproduce the results presented in the paper, download the following compressed data tarball from [here]("https://figshare.com/download) (~26GB, when uncompressed):
+To reproduce the results presented in the paper, download the following compressed data tarball from [here](https://figshare.com/articles/dataset/molucn-data/21215477) (~26GB, when uncompressed):
 
 ```bash
 wget -O data.tar.gz "https://figshare.com/articles/dataset/molucn-data/21215477?file=37624043"
