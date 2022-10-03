@@ -87,12 +87,12 @@ with open(train_data_path, "rb") as fp:
     train_colors = dill.load(fp)
 train_colors
 # %%
-pair = train_pairs[4]
+pair = train_pairs[2]
 c_i = pair.data_i
 c_j = pair.data_j
 c_i.x.size()
 #%%
-colors = train_colors[4]
+colors = train_colors[2]
 colors_i = colors[0]
 colors_j = colors[1]
 len(colors_i)
@@ -213,19 +213,15 @@ smiles_attention_to_svg(colors_j[torch.BoolTensor(np.where(c_j.mask == 0, 0, 1))
 # %%
 template = Chem.MolFromSmiles('O=C(O)c1c(O)c(-c2ccccc2)nc2ccccc12')
 AllChem.Compute2DCoords(template)
-smiles_attention_to_svg(c_i.mask[np.where(c_i.mask !=0)[0]], np.where(c_i.mask != 0)[0], mi, color_mapper, template, file_name = 'draw_mi_true_4.png')
-smiles_attention_to_svg(c_j.mask[np.where(c_j.mask !=0)[0]], np.where(c_j.mask != 0)[0], mj, color_mapper, template, file_name = 'draw_mj_true_4.png')
+smiles_attention_to_svg(c_i.mask[np.where(c_i.mask !=0)[0]], np.where(c_i.mask != 0)[0], mi, color_mapper, template, file_name = 'draw_mi_true_2.png')
+smiles_attention_to_svg(c_j.mask[np.where(c_j.mask !=0)[0]], np.where(c_j.mask != 0)[0], mj, color_mapper, template, file_name = 'draw_mj_true_2.png')
 
-# %%
-for atom in mi.GetAtoms():
-    print('atom idx: ', atom.GetIdx())
-    print(c_i.x[atom.GetIdx(), :])
 # %%
 color_mapper = get_color_mapper([*colors_i, *colors_j])
 # %%
 print(c_i.y, c_j.y)
 print(c_i.mask, c_j.mask)
-print(colors_i[torch.BoolTensor(np.where(c_i.mask == 0, 0, 1))], colors_j[torch.BoolTensor(np.where(c_j.mask == 0, 0, 1))])
+print(colors_i[torch.BoolTensor(np.where(c_i.mask == 0, 0, 1))].mean() - colors_j[torch.BoolTensor(np.where(c_j.mask == 0, 0, 1))].mean())
 # %%
 c_i.mask[np.where(c_i.mask !=0)[0]]
 # %%
