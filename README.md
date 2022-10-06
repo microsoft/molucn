@@ -1,6 +1,6 @@
 # Introduction 
 
-Supporting code and analyses for "A substructure-aware loss for feature attribution in drug discovery", as submitted to the NeurIPS 2022 AI4Science [workshop](https://ai4sciencecommunity.github.io/).
+Supporting code and analyses for [A substructure-aware loss for feature attribution in drug discovery](https://chemrxiv.org/engage/chemrxiv/article-details/633a98bbea6a22542f06e149), as submitted to the NeurIPS 2022 AI4Science [workshop](https://ai4sciencecommunity.github.io/).
 
 # Getting Started
 
@@ -81,4 +81,16 @@ bash main.sh [diff, gradinput, ig, cam, gradcam]
 
 ```
 bash main_rf.sh
+```
+
+## Citation
+
+If you find this work or parts thereof useful, please consider citing:
+
+```
+@article{amara2022substructure,
+  title={A substructure-aware loss for feature attribution in drug discovery},
+  author={Amara, Kenza and Rodriguez-Perez, Raquel and Luna, Jos{\'e} Jim{\'e}nez},
+  year={2022}
+}
 ```
