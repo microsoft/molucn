@@ -132,14 +132,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Folder
-xaibench/
-data/
-amlt/
-test/
-figures/
-logs/
-results/
 
 # Files
 xaicode/feat_attribution/shap.py
