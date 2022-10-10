@@ -57,13 +57,13 @@ The trained GNN models and their logs (metrics) will be saved under `models/` an
 To train the GNN model and run a feature attribution for one target protein (e.g., 1D3G-BRE) run:
 
 ```bash
-python xaicode/main.py --target 1D3G-BRE --method [diff, gradinput, ig, cam, gradcam]
+python molucn/main.py --target 1D3G-BRE --method [diff, gradinput, ig, cam, gradcam]
 ```
 
 For the random forest and masking baseline:
 
 ```bash
-python xaicode/main_rf.py --target 1D3G-BRE
+python molucn/main_rf.py --target 1D3G-BRE
 ```
 
 

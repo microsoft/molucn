@@ -5,7 +5,7 @@ import torch
 from torch import nn
 from torch_geometric.data import Batch, DataLoader
 from tqdm import tqdm
-from xaicode.gnn.loss import loss_uncommon_node, loss_uncommon_node_local
+from molucn.gnn.loss import loss_uncommon_node, loss_uncommon_node_local
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
