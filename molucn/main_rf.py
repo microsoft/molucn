@@ -9,12 +9,12 @@ import pandas as pd
 from rdkit.Chem import MolFromSmiles
 from sklearn.ensemble import RandomForestRegressor
 
-from xaicode.evaluation.explain_color import get_scores
-from xaicode.evaluation.explain_direction_global import get_global_directions
-from xaicode.evaluation.explain_direction_local import get_local_directions
-from xaicode.utils.parser_utils import overall_parser_rf
-from xaicode.utils.rf_utils import diff_mask, featurize_ecfp4
-from xaicode.utils.utils import get_mcs, set_seed
+from molucn.evaluation.explain_color import get_scores
+from molucn.evaluation.explain_direction_global import get_global_directions
+from molucn.evaluation.explain_direction_local import get_local_directions
+from molucn.utils.parser_utils import overall_parser_rf
+from molucn.utils.rf_utils import diff_mask, featurize_ecfp4
+from molucn.utils.utils import get_mcs, set_seed
 
 os.environ["WANDB_SILENT"] = "true"
 N_TREES = 1000
@@ -87,11 +87,7 @@ def main_rf(args):
     model_rf = RandomForestRegressor(n_estimators=N_TREES, n_jobs=N_JOBS)
     model_rf.fit(fps_train, y_train)
 
-    # yhat_train = rf.predict(fps_train)
     yhat_test = model_rf.predict(fps_test)
-
-    # rmse_train = rmse(df_train.y, yhat_train)
-    # pcc_train = np.corrcoef((df_train.y, yhat_train))[0, 1]
 
     rmse_test = rmse(y_test, yhat_test)
     pcc_test = np.corrcoef((y_test, yhat_test))[0, 1]
@@ -206,7 +202,6 @@ def main_rf(args):
 
 
 if __name__ == "__main__":
-
     parser = overall_parser_rf()
     args = parser.parse_args()
     main_rf(args)

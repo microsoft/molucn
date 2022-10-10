@@ -7,7 +7,7 @@ from typing import List
 
 import numpy as np
 import pandas as pd
-from xaicode.utils.parser_utils import overall_parser
+from molucn.utils.parser_utils import overall_parser
 
 NO_VALUES_AT = [28, 269, 346, 600, 608, 655]
 
@@ -37,7 +37,6 @@ def get_selected_indices(mapping: dict, list_targets: List[str]) -> List[int]:
 
 
 if __name__ == "__main__":
-
     parser = overall_parser()
     args = parser.parse_args()
     train_params = f"{args.conv}_{args.loss}_{args.pool}_{args.lambda1}"

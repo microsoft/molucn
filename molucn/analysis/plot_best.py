@@ -8,15 +8,12 @@ import numpy as np
 import matplotlib
 matplotlib.use('agg')
 import seaborn as sns
-from collections import Counter
 
 sns.set_theme(style="whitegrid")
 
 matplotlib.rcParams["figure.facecolor"] = "white"
 
 par_dir = "/home/t-kenzaamara/molucn"
-import scipy.stats as stats
-import shutil
 
 # Option: plot all targets or sub targets for which GNN rmse < RF rmse
 

@@ -1,9 +1,6 @@
-import argparse
 import os
 import os.path as osp
 import time
-import warnings
-from tkinter import Y
 
 import dill
 import numpy as np
@@ -13,22 +10,20 @@ from sklearn.model_selection import train_test_split
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch_geometric.data import DataLoader
 
-from xaicode.dataset.pair import get_num_features
-from xaicode.evaluation.explain_color import get_scores
-from xaicode.evaluation.explain_direction_global import get_global_directions
-from xaicode.evaluation.explain_direction_local import get_local_directions
-from xaicode.feat_attribution.cam import CAM
-from xaicode.feat_attribution.diff import Diff
-from xaicode.feat_attribution.gradcam import GradCAM
-from xaicode.feat_attribution.gradinput import GradInput
-from xaicode.feat_attribution.ig import IntegratedGradient
-from xaicode.feat_attribution.shap import SHAP
-from xaicode.gnn.model import GNN
-from xaicode.utils.parser_utils import overall_parser
-from xaicode.utils.train_utils import DEVICE, test_epoch, train_epoch  # move to
-from xaicode.utils.utils import get_mcs, set_seed
+from molucn.dataset.pair import get_num_features
+from molucn.evaluation.explain_color import get_scores
+from molucn.evaluation.explain_direction_global import get_global_directions
+from molucn.evaluation.explain_direction_local import get_local_directions
+from molucn.feat_attribution.cam import CAM
+from molucn.feat_attribution.diff import Diff
+from molucn.feat_attribution.gradcam import GradCAM
+from molucn.feat_attribution.gradinput import GradInput
+from molucn.feat_attribution.ig import IntegratedGradient
+from molucn.gnn.model import GNN
+from molucn.utils.parser_utils import overall_parser
+from molucn.utils.train_utils import DEVICE, test_epoch, train_epoch 
+from molucn.utils.utils import get_mcs, set_seed
 
-os.environ["WANDB_SILENT"] = "true"
 
 
 def main(args):
@@ -37,7 +32,6 @@ def main(args):
         f"{args.conv}_{args.loss}_{args.pool}_{args.lambda1}_{args.explainer}"
     )
 
-    # wandb.init(project=f'{train_params}_training', entity='k-amara', name=args.target)
 
     ##### Data loading and pre-processing #####
 
@@ -119,7 +113,6 @@ def main(args):
             loss_type=args.loss,
             lambda1=args.lambda1,
         )
-        # wandb.watch(model, nn.MSELoss(), log="all")
 
         rmse_val, pcc_val = test_epoch(val_loader, model)
         scheduler.step(rmse_val)
@@ -130,7 +123,6 @@ def main(args):
         rmse_test, pcc_test = test_epoch(test_loader, model)
         t3 = time.time()
 
-        # wandb.log({"epoch": epoch, "loss": loss, "pcc_test": pcc_test, "rmse_test": rmse_test})
 
         if epoch % args.verbose == 0:
             print(
@@ -206,8 +198,6 @@ def main(args):
         explainer = GradInput(DEVICE, model)
     elif args.explainer == "ig":
         explainer = IntegratedGradient(DEVICE, model)
-    elif args.explainer == "shap":
-        explainer = SHAP(DEVICE, model, num_node_features)
     elif args.explainer == "cam":
         explainer = CAM(DEVICE, model)
     elif args.explainer == "gradcam":

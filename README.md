@@ -73,7 +73,7 @@ To reproduce the results for the 350 protein targets:
 - GNN-based methods :
 
 ```bash
-bash main.sh [diff, gradinput, ig, cam, gradcam]
+bash main.sh {diff|gradinput|ig|cam|gradcam}
 ```
 
 

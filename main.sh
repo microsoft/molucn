@@ -1,11 +1,10 @@
 #!/bin/bash
 
-LIST_TARGETS=`cat data/list_targets_20.txt`;
+LIST_TARGETS=`cat data/list_targets_350.txt`;
 
-echo $LIST_TARGETS;
-echo "explainer: $1";
+echo "Using attribution technique: ${1}";
 
-for target in $LIST_TARGETS; do
-    echo "Training $target"
-    python xaicode/main.py --target $target --explainer $1
+for target in ${LIST_TARGETS}; do
+    echo "Now training and attributing on target w. PDB Id: ${target}"
+    python molucn/main.py --target ${target} --explainer ${1}
 done

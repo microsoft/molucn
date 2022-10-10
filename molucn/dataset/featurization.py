@@ -1,12 +1,5 @@
-# import packages
-
-# general tools
 import numpy as np
-
-# Pytorch and Pytorch Geometric
 import torch
-
-# RDkit
 from rdkit import Chem
 from rdkit.Chem.rdchem import Atom, Bond
 from rdkit.Chem.rdmolops import GetAdjacencyMatrix
