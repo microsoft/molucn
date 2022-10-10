@@ -3,7 +3,7 @@
 import torch
 from torch_geometric.data import Data
 
-from xaicode.feat_attribution.explainer_base import Explainer
+from molucn.feat_attribution.explainer_base import Explainer
 
 
 class CAM(Explainer):

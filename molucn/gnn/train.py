@@ -6,20 +6,18 @@ import time
 import dill
 import pandas as pd
 import torch
-import wandb
 from sklearn.model_selection import train_test_split
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch_geometric.data import DataLoader
-from xaicode.dataset.pair import get_num_features
-from xaicode.gnn.model import GNN
-from xaicode.utils.parser_utils import overall_parser
-from xaicode.utils.train_utils import DEVICE, test_epoch, train_epoch  # move to
-from xaicode.utils.utils import set_seed
+from molucn.dataset.pair import get_num_features
+from molucn.gnn.model import GNN
+from molucn.utils.parser_utils import overall_parser
+from molucn.utils.train_utils import DEVICE, test_epoch, train_epoch
+from molucn.utils.utils import set_seed
 
 print(sys.path)
 
 
-os.environ["WANDB_SILENT"] = "true"
 save_dir = os.getenv("AMLT_OUTPUT_DIR", "/tmp")
 data_dir = os.environ["AMLT_DATA_DIR"]
 
@@ -32,7 +30,6 @@ def train_gnn(args, save_model=True):
         f"{args.conv}_{args.loss}_{args.pool}_{args.lambda1}_{args.explainer}"
     )
 
-    # wandb.init(project=f'{train_params}_training', entity='k-amara', name=args.target)
 
     # Check that data exists
     file_train = osp.join(
@@ -62,7 +59,6 @@ def train_gnn(args, save_model=True):
     )
     # Ligands in validation set might also be in training set!
 
-    # print(len(train_dataset), len(val_dataset), len(test_dataset))
 
     test_loader = DataLoader(
         test_dataset,
@@ -115,7 +111,6 @@ def train_gnn(args, save_model=True):
             loss_type=args.loss,
             lambda1=args.lambda1,
         )
-        # wandb.watch(model, nn.MSELoss(), log="all")
 
         rmse_val, pcc_val = test_epoch(val_loader, model)
         scheduler.step(rmse_val)
@@ -125,8 +120,6 @@ def train_gnn(args, save_model=True):
         t2 = time.time()
         rmse_test, pcc_test = test_epoch(test_loader, model)
         t3 = time.time()
-
-        # wandb.log({"epoch": epoch, "loss": loss, "pcc_test": pcc_test, "rmse_test": rmse_test})
 
         if epoch % args.verbose == 0:
             print(

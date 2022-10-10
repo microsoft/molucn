@@ -4,7 +4,6 @@ import os.path as osp
 import matplotlib
 #matplotlib.use('agg')
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.style
@@ -21,7 +20,7 @@ par_dir = '/home/t-kenzaamara/molucn'
 
 sns.set_context("notebook", rc={"legend.fontsize":26, "legend.title_fontsize":27, 
                                 "axes.titlesize":27,"axes.labelsize":27,
-                               "xtick.labelsize" : 23, "ytick.labelsize" : 23})
+                                "xtick.labelsize" : 23, "ytick.labelsize" : 23})
 sns.set_style("whitegrid")
 
 # %%
@@ -34,40 +33,20 @@ attr_res = attr_res[attr_res['explainer'] !='shap']
 #%% 
 status = dict(Counter(attr_res.target))
 attr_res["status"] = attr_res["target"].map(status)
+print(attr_res[attr_res.status<max(attr_res['status'])].target.unique())
 attr_res = attr_res[attr_res.status==max(attr_res['status'])]
 print(len(attr_res['target'].unique()))
-# %%
-df = attr_res.groupby(['target', 'mcs']).mean().reset_index()[['target', 'mcs', 'n_mcs_train', 'n_mcs_test']]
-
-df_full = df.groupby('mcs').sum().reset_index()
-
-mcs_stats = pd.merge(df, df_full, on='mcs', how='left', suffixes=('', '_full'))
-mcs_stats['w_train'] = mcs_stats['n_mcs_train']/mcs_stats['n_mcs_train_full']
-mcs_stats['w_test'] = mcs_stats['n_mcs_test']/mcs_stats['n_mcs_test_full']
-mcs_stats
-#%%
-w_attr_res = pd.merge(attr_res,mcs_stats, on=['mcs','target'], how='left', suffixes=('', '_full'))
-print(w_attr_res)
-for col in ['acc', 'global_dir', 'local_dir']:
-    for set in ['train', 'test']:
-        score = col+'_'+set
-        w_attr_res[score]=w_attr_res.apply(lambda x: x[score]*x['w_'+set], axis = 1)
-
-# %% 
-w_attr_res = w_attr_res.groupby(['mcs', 'loss', 'explainer']).sum().reset_index()
-w_attr_res
-
 # %% 
 pal = sns.color_palette("tab10")
 dict_color = {"gradinput":pal[0], "ig":pal[1], "cam":pal[2], "gradcam": pal[3], "diff": pal[4], "shap": pal[5], "rf":"black"}
 leg_labels = {"gradinput":"GradInput", "ig":"IntegratedGrads", "cam":"CAM", "gradcam": "Grad-CAM", "diff": "Masking (GNN)", "shap": "SHAP", "rf":"Masking (RF)"}
 order_items = {"rf":0, "diff": 1, "gradinput":2, "ig":3, "cam":4, "gradcam":5}#, "shap":6}
-w_attr_res['order'] = w_attr_res['explainer'].apply(lambda x: order_items[x])
-w_attr_res = w_attr_res.sort_values(by='order')
-w_attr_res['acc_test_%'] = w_attr_res['acc_test'].apply(lambda x: x*100)
-w_attr_res['acc_train_%'] = w_attr_res['acc_train'].apply(lambda x: x*100)
-w_attr_res['global_dir_test_%'] = w_attr_res['global_dir_test'].apply(lambda x: x*100)
-w_attr_res['global_dir_train_%'] = w_attr_res['global_dir_train'].apply(lambda x: x*100)
+attr_res['order'] = attr_res['explainer'].apply(lambda x: order_items[x])
+attr_res = attr_res.sort_values(by='order')
+attr_res['acc_test_%'] = attr_res['acc_test'].apply(lambda x: x*100)
+attr_res['acc_train_%'] = attr_res['acc_train'].apply(lambda x: x*100)
+attr_res['global_dir_test_%'] = attr_res['global_dir_test'].apply(lambda x: x*100)
+attr_res['global_dir_train_%'] = attr_res['global_dir_train'].apply(lambda x: x*100)
 
 
 # %%
@@ -81,7 +60,7 @@ fig, axs = plt.subplots(1, 3, figsize=(18,6), sharey=True, sharex=True)
 sns.lineplot(
     x="mcs",
     y="acc_test_%",
-    data=w_attr_res[(w_attr_res.loss=='MSE')|(w_attr_res.loss=='RF')],
+    data=attr_res[(attr_res.loss=='MSE')|(attr_res.loss=='RF')],
     hue="explainer",
     marker="o",
     markersize=7,
@@ -93,13 +72,13 @@ sns.lineplot(
     ax=axs[0]
 )
 axs[0].set_title(r'$\mathcal{L}_{\mathrm{MSE}}$', pad=10)
-axs[0].set_ylabel("Weighted color agreement (\%)", labelpad=10)
+axs[0].set_ylabel("Color agreement (\%)", labelpad=10)
 axs[0].set(xlabel=None)
 
 sns.lineplot(
     x="mcs",
     y="acc_test_%",
-    data=w_attr_res[(w_attr_res.loss=='MSE+AC')|(w_attr_res.loss=='RF')],
+    data=attr_res[(attr_res.loss=='MSE+AC')|(attr_res.loss=='RF')],
     hue="explainer",
     marker="o",
     markersize=7,
@@ -116,7 +95,7 @@ axs[1].set(xlabel=None)
 g = sns.lineplot(
     x="mcs",
     y="acc_test_%",
-    data=w_attr_res[(w_attr_res.loss=='MSE+UCN')|(w_attr_res.loss=='RF')],
+    data=attr_res[(attr_res.loss=='MSE+UCN')|(attr_res.loss=='RF')],
     hue="explainer",
     marker="o",
     markersize=7,
@@ -138,8 +117,7 @@ for i in range(len(order_items.keys())):
 fig.text(0.45, -0.04, "Minimum shared MCS atoms among testing pairs (\%)", ha='center', fontsize=27)
 plt.xlim(48,97)
 plt.tight_layout()
-plt.savefig(os.path.join(par_dir, 'figures/weighted_acc_test.pdf'), bbox_inches="tight")
-
+plt.savefig(os.path.join(par_dir, 'figures/acc_test.pdf'), bbox_inches="tight")
 
 
 # %% 
@@ -150,7 +128,7 @@ fig, axs = plt.subplots(1, 3, figsize=(18,6), sharey=True, sharex=True)
 sns.lineplot(
     x="mcs",
     y="acc_train_%",
-    data=w_attr_res[(w_attr_res.loss=='MSE')|(w_attr_res.loss=='RF')],
+    data=attr_res[(attr_res.loss=='MSE')|(attr_res.loss=='RF')],
     hue="explainer",
     marker="o",
     markersize=7,
@@ -162,13 +140,13 @@ sns.lineplot(
     ax=axs[0]
 )
 axs[0].set_title(r'$\mathcal{L}_{\mathrm{MSE}}$', pad=10)
-axs[0].set_ylabel("Weighted color agreement (\%)", labelpad=10)
+axs[0].set_ylabel("Color agreement (\%)", labelpad=10)
 axs[0].set(xlabel=None)
 
 sns.lineplot(
     x="mcs",
     y="acc_train_%",
-    data=w_attr_res[(w_attr_res.loss=='MSE+AC')|(w_attr_res.loss=='RF')],
+    data=attr_res[(attr_res.loss=='MSE+AC')|(attr_res.loss=='RF')],
     hue="explainer",
     marker="o",
     markersize=7,
@@ -185,7 +163,7 @@ axs[1].set(xlabel=None)
 g = sns.lineplot(
     x="mcs",
     y="acc_train_%",
-    data=w_attr_res[(w_attr_res.loss=='MSE+UCN')|(w_attr_res.loss=='RF')],
+    data=attr_res[(attr_res.loss=='MSE+UCN')|(attr_res.loss=='RF')],
     hue="explainer",
     marker="o",
     markersize=7,
@@ -207,7 +185,7 @@ for i in range(len(order_items.keys())):
 fig.text(0.45, -0.04, "Minimum shared MCS atoms among training pairs (\%)", ha='center', fontsize=27)
 plt.xlim(48,97)
 plt.tight_layout()
-plt.savefig(os.path.join(par_dir, 'figures/weighted_acc_train.pdf'), bbox_inches="tight")
+plt.savefig(os.path.join(par_dir, 'figures/acc_train.pdf'), bbox_inches="tight")
 
 
 
@@ -221,7 +199,7 @@ fig, axs = plt.subplots(1, 3, figsize=(18,6), sharey=True, sharex=True)
 sns.lineplot(
     x="mcs",
     y="global_dir_test_%",
-    data=w_attr_res[(w_attr_res.loss=='MSE')|(w_attr_res.loss=='RF')],
+    data=attr_res[(attr_res.loss=='MSE')|(attr_res.loss=='RF')],
     hue="explainer",
     marker="o",
     markersize=7,
@@ -233,14 +211,14 @@ sns.lineplot(
     ax=axs[0]
 )
 axs[0].set_title(r'$\mathcal{L}_{\mathrm{MSE}}$', pad=10)
-axs[0].set_ylabel("Weighted global direction (\%)", labelpad=10)
+axs[0].set_ylabel("Global direction (\%)", labelpad=10)
 #axs[0].set_xlabel("Minimum shared MCS atoms among pairs (%)")
 axs[0].set(xlabel=None)
 
 sns.lineplot(
     x="mcs",
     y="global_dir_test_%",
-    data=w_attr_res[(w_attr_res.loss=='MSE+AC')|(w_attr_res.loss=='RF')],
+    data=attr_res[(attr_res.loss=='MSE+AC')|(attr_res.loss=='RF')],
     hue="explainer",
     marker="o",
     markersize=7,
@@ -258,7 +236,7 @@ axs[1].set(xlabel=None)
 g = sns.lineplot(
     x="mcs",
     y="global_dir_test_%",
-    data=w_attr_res[(w_attr_res.loss=='MSE+UCN')|(w_attr_res.loss=='RF')],
+    data=attr_res[(attr_res.loss=='MSE+UCN')|(attr_res.loss=='RF')],
     hue="explainer",
     marker="o",
     markersize=7,
@@ -282,7 +260,7 @@ fig.text(0.45, -0.04, "Minimum shared MCS atoms among testing pairs (\%)", ha='c
 #fig.suptitle("Global direction vs MCS - Test", fontsize=32)
 plt.xlim(48,97)
 plt.tight_layout()
-plt.savefig(os.path.join(par_dir, 'figures/weighted_gdir_test.pdf'), bbox_inches="tight")
+plt.savefig(os.path.join(par_dir, 'figures/gdir_test.pdf'), bbox_inches="tight")
 
 ########## Global direction #########
 # %% 
@@ -293,7 +271,7 @@ fig, axs = plt.subplots(1, 3, figsize=(18,6), sharey=True, sharex=True)
 sns.lineplot(
     x="mcs",
     y="global_dir_train_%",
-    data=w_attr_res[(w_attr_res.loss=='MSE')|(w_attr_res.loss=='RF')],
+    data=attr_res[(attr_res.loss=='MSE')|(attr_res.loss=='RF')],
     hue="explainer",
     marker="o",
     markersize=7,
@@ -305,13 +283,13 @@ sns.lineplot(
     ax=axs[0]
 )
 axs[0].set_title(r'$\mathcal{L}_{\mathrm{MSE}}$', pad=10)
-axs[0].set_ylabel("Weighted global direction (\%)", labelpad=10)
+axs[0].set_ylabel("Global direction (\%)", labelpad=10)
 axs[0].set(xlabel=None)
 
 sns.lineplot(
     x="mcs",
     y="global_dir_train_%",
-    data=w_attr_res[(w_attr_res.loss=='MSE+AC')|(w_attr_res.loss=='RF')],
+    data=attr_res[(attr_res.loss=='MSE+AC')|(attr_res.loss=='RF')],
     hue="explainer",
     marker="o",
     markersize=7,
@@ -328,7 +306,7 @@ axs[1].set(xlabel=None)
 g = sns.lineplot(
     x="mcs",
     y="global_dir_train_%",
-    data=w_attr_res[(w_attr_res.loss=='MSE+UCN')|(w_attr_res.loss=='RF')],
+    data=attr_res[(attr_res.loss=='MSE+UCN')|(attr_res.loss=='RF')],
     hue="explainer",
     marker="o",
     markersize=7,
@@ -350,186 +328,5 @@ for i in range(len(order_items.keys())):
 fig.text(0.45, -0.04, "Minimum shared MCS atoms among training pairs (\%)", ha='center', fontsize=27)
 plt.xlim(48,97)
 plt.tight_layout()
-plt.savefig(os.path.join(par_dir, 'figures/weighted_gdir_train.pdf'), bbox_inches="tight")
+plt.savefig(os.path.join(par_dir, 'figures/gdir_train.pdf'), bbox_inches="tight")
 # %%
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# %%
-res_50 = w_attr_res[w_attr_res.mcs==50]
-res_50 = res_50.groupby(['loss', 'explainer']).sum().reset_index()
-##### FEATURE ATTRIBUTION ######
-###############################################################################
-
-# %%
-res_50 
-# %%
-##### Feature attribution - Color agreement ######
-###############################################################################
-
-fig, ax = plt.subplots(figsize=(8, 5))
-sns.lineplot(
-    x="explainer",
-    y="acc_train",
-    data=res_50[res_50.explainer!='rf'],
-    hue="loss",
-    marker="o",
-    markersize=10,
-    ci=30,
-    err_style="bars",
-)
-sns.lineplot(x="explainer",  y="acc_train",
-    data=res_50[res_50.explainer=='rf'],
-    color="black",
-    marker="o", markersize=10,)
-ax.set_title("Accuracy - Color agreement - Train")
-ax.set_ylabel("Weighted color accuracy")
-ax.set_xlabel("Feature attribution method")
-plt.tight_layout()
-
-
-fig, ax = plt.subplots(figsize=(8, 5))
-sns.lineplot(
-    x="explainer",
-    y="acc_test",
-    data=res_50[res_50.explainer!='rf'],
-    hue="loss",
-    marker="o",
-    markersize=10,
-    linestyle="dashed",
-    ci=30,
-    err_style="bars",
-)
-sns.lineplot(x="explainer",  y="acc_test",
-    data=res_50[res_50.explainer=='rf'],
-    color="black",
-    marker="o", markersize=10,)
-ax.set_title("Accuracy - Color agreement - Test")
-ax.set_ylabel("Weighted color accuracy")
-ax.set_xlabel("Feature attribution method")
-plt.tight_layout()
-
-
-# %%
-
-##### Feature attribution - Global direction ######
-###############################################################################
-
-
-# %%
-
-fig, ax = plt.subplots(figsize=(8, 5))
-sns.lineplot(
-    x="explainer",
-    y="global_dir_train",
-    data=res_50[res_50.explainer!='rf'],
-    hue="loss",
-    marker="o",
-    markersize=10,
-    ci=30,
-    err_style="bars",
-)
-sns.lineplot(x="explainer",  y="global_dir_train",
-    data=res_50[res_50.explainer=='rf'],
-    color="black",
-    marker="o", markersize=10,)
-ax.set_title("Global direction - Train")
-ax.set_ylabel("Weighted global direction")
-ax.set_xlabel("Feature attribution method")
-plt.tight_layout()
-
-fig, ax = plt.subplots(figsize=(8, 5))
-sns.lineplot(
-    x="explainer",
-    y="global_dir_test",
-    data=res_50[res_50.explainer!='rf'],
-    hue="loss",
-    marker="o",
-    markersize=10,
-    linestyle="dashed",
-    ci=30,
-    err_style="bars",
-)
-sns.lineplot(x="explainer",  y="global_dir_test",
-    data=res_50[res_50.explainer=='rf'],
-    color="black",
-    marker="o", markersize=10,)
-ax.set_title("Global direction - Test")
-ax.set_ylabel("Weighted global direction")
-ax.set_xlabel("Feature attribution method")
-plt.tight_layout()
-
-
-
-# %%
-
-##### Feature attribution - Local direction ######
-###############################################################################
-
-
-# %%
-
-fig, ax = plt.subplots(figsize=(8, 5))
-sns.lineplot(
-    x="explainer",
-    y="local_dir_train",
-    data=res_50[res_50.explainer!='rf'],
-    hue="loss",
-    marker="o",
-    markersize=10,
-    ci=30,
-    err_style="bars",
-)
-sns.lineplot(x="explainer",  y="local_dir_train",
-    data=res_50[res_50.explainer=='rf'],
-    color="black",
-    marker="o", markersize=10,)
-ax.set_title("Local direction - Train")
-ax.set_ylabel("Local direction")
-ax.set_xlabel("Feature attribution method")
-plt.tight_layout()
-
-fig, ax = plt.subplots(figsize=(8, 5))
-sns.lineplot(
-    x="explainer",
-    y="local_dir_test",
-    data=res_50[res_50.explainer!='rf'],
-    hue="loss",
-    marker="o",
-    markersize=10,
-    linestyle="dashed",
-    ci=30,
-    err_style="bars",
-)
-sns.lineplot(x="explainer",  y="local_dir_test",
-    data=res_50[res_50.explainer=='rf'],
-    color="black",
-    marker="o", markersize=10,)
-ax.set_title("Local direction - Test")
-ax.set_ylabel("Local direction")
-ax.set_xlabel("Feature attribution method")
-plt.tight_layout()
-
-

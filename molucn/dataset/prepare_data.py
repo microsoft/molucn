@@ -33,7 +33,7 @@ def ensure_readability(strings: List[str], read_f: Callable) -> List[int]:
 def translate(
     strings_: List[str], fromfun: Callable, tofun: Callable
 ) -> Tuple[List[str], List[int]]:
-    """Translat a list of strings from one format to another."""
+    """Translate a list of molecular strings from one format to another."""
     trans = []
     idx_success = []
     for idx, s in enumerate(strings_):
@@ -52,7 +52,6 @@ def process_tsv(
     ligcol="Ligand SMILES",
     affcol="IC50 (nM)",
     use_log=True,
-    min_p_diff=MIN_P_DIFF,
     mw_thr=MW_THR,
 ) -> pd.DataFrame:
 
