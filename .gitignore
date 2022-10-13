@@ -133,9 +133,8 @@ dmypy.json
 .pyre/
 
 
-# Files
-xaicode/feat_attribution/shap.py
-xaicode/utils/amlt_utils.py
+# Folder
+molucn/analysis
 
 # Data
 *.pt
