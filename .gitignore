@@ -141,7 +141,3 @@ molucn/analysis
 *.json
 *.txt
 *.csv
-
-# Amlt
-.amltignore
-.amltconfig
