@@ -1,4 +1,4 @@
-# Introduction 
+# Introduction
 
 Supporting code and analyses for [A substructure-aware loss for feature attribution in drug discovery](https://chemrxiv.org/engage/chemrxiv/article-details/633a98bbea6a22542f06e149), as submitted to the NeurIPS 2022 AI4Science [workshop](https://ai4sciencecommunity.github.io/).
 
@@ -24,7 +24,6 @@ tar -xf data.tar.gz
 
 As the original [benchmark study](https://github.com/josejimenezluna/xaibench_tf), the data provided here is composed of subdirectories organized by PDB identifier, contaning activity data for each target considered in the benchmark. Subfolders have the following structure:
 
-
 ```bash
 (molucn):~/molucn/data/1D3G-BRE$ tree
 .
@@ -37,14 +36,12 @@ As the original [benchmark study](https://github.com/josejimenezluna/xaibench_tf
 
 An explanation for each file in the subdirectories is provided below:
 
-- `1D3G-BRE_heterodata_list.pt`: dataset with all pairs of ligands saved as `torch_geometric.data.HeteroData` objects with information containing the SMILES, grount-truth colorings, ligand activities, and molecule structures in `torch_geometric.data.Data` objects and the MCS boolean lists at different thresholds. 
+- `1D3G-BRE_heterodata_list.pt`: dataset with all pairs of ligands saved as `torch_geometric.data.HeteroData` objects with information containing the SMILES, grount-truth colorings, ligand activities, and molecule structures in `torch_geometric.data.Data` objects and the MCS boolean lists at different thresholds.
 - `1D3G-BRE_seed_1337_info.txt`: text file containing information on the congeneric series: number of different ligands/compounds, number of pairs, number of training and testing pairs after 1. splitting the compounds in training and testing sets, 2. keeping pairs with no overlap, 3. rebalancing the training and testing pairs to have a 80%/20% ratio.
 - `1D3G-BRE_seed_1337_stats.csv`: summarizes the previous .txt file into a .csv file to facilitate information extraction.
 - `1D3G-BRE_seed_1337_test.pt` and `1D3G-BRE_seed_1337_train.pt`: contains the test and train pairs, respectively, saved as `torch_geometric.data.HeteroData` objects obtained after the preprocessing and rebalancing pipelines.
 
-
 All the `.pt` files can be read with the Python [dill](https://pypi.org/project/dill/) module.
-
 
 ## Build and Test
 
@@ -66,16 +63,15 @@ For the random forest and masking baseline:
 python molucn/main_rf.py --target 1D3G-BRE
 ```
 
-
 ## Test on all 350 protein targets
 
 To reproduce the results for the 350 protein targets:
+
 - GNN-based methods :
 
 ```bash
 bash main.sh {diff|gradinput|ig|cam|gradcam}
 ```
-
 
 - RF masking:
 

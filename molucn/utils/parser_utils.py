@@ -9,7 +9,7 @@ def overall_parser():
     """Generates a parser for the arguments of the train_gnn.py, main.py, main_rf.py scripts."""
     parser = argparse.ArgumentParser(description="Train GNN Model")
 
-    parser.add_argument("--dest", type=str, default="/home/t-kenzaamara/internship2022")
+    parser.add_argument("--dest", type=str, default="/cluster/home/kamara")
     parser.add_argument(
         "--wandb",
         type=str,
@@ -109,7 +109,7 @@ def overall_parser():
 def overall_parser_rf():
     parser = argparse.ArgumentParser(description="Train GNN Model")
 
-    parser.add_argument("--dest", type=str, default="/home/t-kenzaamara/internship2022")
+    parser.add_argument("--dest", type=str, default="/cluster/home/kamara")
     parser.add_argument(
         "--wandb",
         type=str,

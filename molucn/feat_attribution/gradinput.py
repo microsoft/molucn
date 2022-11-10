@@ -16,7 +16,6 @@ class GradInput(Explainer):
             model = self.model
 
         tmp_graph = graph.clone().to(self.device)
-
         tmp_graph.edge_attr = Variable(tmp_graph.edge_attr, requires_grad=True)
         tmp_graph.x = Variable(tmp_graph.x, requires_grad=True)
         pred = model(tmp_graph)

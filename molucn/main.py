@@ -19,6 +19,7 @@ from molucn.feat_attribution.diff import Diff
 from molucn.feat_attribution.gradcam import GradCAM
 from molucn.feat_attribution.gradinput import GradInput
 from molucn.feat_attribution.ig import IntegratedGradient
+from molucn.feat_attribution.graphsvx import GraphSVX
 from molucn.gnn.model import GNN
 from molucn.utils.parser_utils import overall_parser
 from molucn.utils.train_utils import DEVICE, test_epoch, train_epoch 
@@ -34,6 +35,7 @@ def main(args):
 
 
     ##### Data loading and pre-processing #####
+    print(args.data_path)
 
     # Check that data exists
     file_train = osp.join(
@@ -204,11 +206,14 @@ def main(args):
         explainer = GradCAM(DEVICE, model)
     elif args.explainer == "diff":
         explainer = Diff(DEVICE, model)
+    elif args.explainer == "graphsvx":
+        explainer = GraphSVX(DEVICE, model)
 
     def get_colors(pairs_list, explainer):
         colors = []
         for hetero_data in pairs_list:
             data_i, data_j = hetero_data["data_i"], hetero_data["data_j"]
+            data_i.batch, data_j.batch = torch.zeros(data_i.x.size(0), dtype=torch.int64), torch.zeros(data_j.x.size(0), dtype=torch.int64)
             color_pred_i, color_pred_j = (
                 explainer.explain_graph(data_i),
                 explainer.explain_graph(data_j),

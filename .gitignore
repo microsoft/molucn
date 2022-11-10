@@ -135,9 +135,15 @@ dmypy.json
 
 # Folder
 molucn/analysis
+molucn/utils/path.py
+data
+clutils
+configs
+
 
 # Data
 *.pt
 *.json
 *.txt
 *.csv
+*.tar.gz
