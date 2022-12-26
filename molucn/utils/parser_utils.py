@@ -56,12 +56,12 @@ def overall_parser():
 
     # Model parameters
     parser.add_argument(
-        "--num_layers", type=int, default=2, help="number of Convolution layers(units)"
+        "--num_layers", type=int, default=3, help="number of Convolution layers(units)"
     )
     parser.add_argument(
         "--hidden_dim",
         type=int,
-        default=32,
+        default=16,
         help="number of neurons in first hidden layer",
     )
     parser.add_argument(
@@ -92,7 +92,7 @@ def overall_parser():
 
     # GNN training parameters
     parser.add_argument("--epoch", type=int, default=200, help="Number of epoch.")
-    parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate.")
+    parser.add_argument("--lr", type=float, default=0.005, help="Learning rate.")
     parser.add_argument("--batch_size", type=int, default=16, help="Batch size.")
     parser.add_argument(
         "--verbose", type=int, default=10, help="Interval of evaluation."

@@ -232,7 +232,7 @@ class GraphSVX(Explainer):
             for e in ex_nei:
                 removed_ei = np.concatenate((removed_ei,np.where(self.graph.edge_index.cpu().detach().numpy()==int(e))[1]))
             removed_ei = np.sort(np.unique(removed_ei))
-            edge_attr = np.delete(self.graph.edge_attr, removed_ei, axis=0)
+            edge_attr = torch.Tensor(np.delete(self.graph.edge_attr.cpu().detach().numpy(), removed_ei, axis=0))
 
 
             # Also change features of excluded nodes (optional)
@@ -242,8 +242,8 @@ class GraphSVX(Explainer):
 
             # Apply model on (X,A) as input.
             edge_index, edge_weights = from_scipy_sparse_matrix(csr_matrix(A))
-            sample_graph = Data(x=X, edge_index=edge_index, edge_attr=edge_attr, batch=torch.zeros(X.size(0), dtype=torch.int64))
-            fz[key] = self.model(sample_graph).item()
+            sample_graph = Data(x=X, edge_index=edge_index.to(self.device), edge_attr=edge_attr.to(self.device), batch=torch.zeros(X.size(0), dtype=torch.int64))
+            fz[key] = self.model(sample_graph.to(self.device)).item()
 
         return fz
 

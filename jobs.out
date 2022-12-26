@@ -1,0 +1,35 @@
+Sender: LSF System <lsfadmin@eu-lo-s4-030>
+Subject: Job 238634982: </cluster/work/zhang/kamara/molucn/checkpoints/test/run_explainer=diff_target=1RNE-C60.sh> in cluster <euler> Done
+
+Job </cluster/work/zhang/kamara/molucn/checkpoints/test/run_explainer=diff_target=1RNE-C60.sh> was submitted from host <eu-login-19> by user <kamara> in cluster <euler> at Tue Nov 15 16:07:29 2022
+Job was executed on host(s) <eu-lo-s4-030>, in queue <gpu.24h>, as user <kamara> in cluster <euler> at Tue Nov 15 18:22:27 2022
+</cluster/home/kamara> was used as the home directory.
+</cluster/home/kamara/molucn> was used as the working directory.
+Started at Tue Nov 15 18:22:27 2022
+Terminated at Wed Nov 16 03:11:42 2022
+Results reported at Wed Nov 16 03:11:42 2022
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+/cluster/work/zhang/kamara/molucn/checkpoints/test/run_explainer=diff_target=1RNE-C60.sh
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   31749.12 sec.
+    Max Memory :                                 4202 MB
+    Average Memory :                             3880.28 MB
+    Total Requested Memory :                     7000.00 MB
+    Delta Memory :                               2798.00 MB
+    Max Swap :                                   -
+    Max Processes :                              5
+    Max Threads :                                13
+    Run time :                                   31755 sec.
+    Turnaround time :                            39853 sec.
+
+The output (if any) follows:
+

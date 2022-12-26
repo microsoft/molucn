@@ -1,7 +1,7 @@
 # Read colors and generate the scores
 import os
 import os.path as osp
-
+import torch
 import dill
 import numpy as np
 import pandas as pd
@@ -10,6 +10,18 @@ from molucn.evaluation.explain_direction_global import get_global_directions
 from molucn.evaluation.explain_direction_local import get_local_directions
 from molucn.utils.parser_utils import overall_parser
 from molucn.utils.utils import get_mcs, set_seed
+
+def get_colors(pairs_list, explainer):
+        colors = []
+        for hetero_data in pairs_list:
+            data_i, data_j = hetero_data["data_i"], hetero_data["data_j"]
+            data_i.batch, data_j.batch = torch.zeros(data_i.x.size(0), dtype=torch.int64), torch.zeros(data_j.x.size(0), dtype=torch.int64)
+            color_pred_i, color_pred_j = (
+                explainer.explain_graph(data_i),
+                explainer.explain_graph(data_j),
+            )
+            colors.append([color_pred_i, color_pred_j])
+        return colors
 
 
 def get_scores_from_colors(args):
