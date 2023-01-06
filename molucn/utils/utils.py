@@ -44,10 +44,10 @@ def set_seed(seed):
     torch.backends.cudnn.deterministic = True
 
 
-def read_list_targets(n_targets):
+def read_list_targets(n_targets, par_dir="data/"):
     """Read the .txt file containing the list of targets with n_targets protein targets"""
     list_targets = []
-    list_file = "list_targets_{}.txt".format(n_targets)
+    list_file = os.path.join(par_dir, "list_targets_{}.txt".format(n_targets))
     if os.path.exists(list_file):
         with open(list_file, "r") as f:
             lines = f.readlines()
