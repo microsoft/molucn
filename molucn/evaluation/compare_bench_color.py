@@ -3,7 +3,7 @@
 import json
 import os
 import os.path as osp
-from typing import List
+from typing import Dict, List
 
 import numpy as np
 import pandas as pd
@@ -18,7 +18,7 @@ def clean_score(score: List[float], selected_idx: List[int]) -> List[float]:
     return score_bench[selected_idx]
 
 
-def create_mapping(path="xaibench/benchmark") -> dict:
+def create_mapping(path="xaibench/benchmark") -> Dict[str, int]:
     """Maps targets to unique indices."""
     mapping = dict()
     k = 0
@@ -28,8 +28,8 @@ def create_mapping(path="xaibench/benchmark") -> dict:
     return mapping
 
 
-def get_selected_indices(mapping: dict, list_targets: List[str]) -> List[int]:
-    """Select the indici of the targets in the list."""
+def get_selected_indices(mapping: Dict[str, int], list_targets: List[str]) -> List[int]:
+    """Select the indices of the targets in the list."""
     selected_idx = []
     for target in list_targets:
         selected_idx.append(mapping[target])

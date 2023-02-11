@@ -1,6 +1,6 @@
 import argparse
 
-from molucn.utils.path import COLOR_DIR, DATA_DIR, LOG_DIR, MODEL_DIR, RESULT_DIR
+from molucn.path import COLOR_DIR, DATA_DIR, LOG_DIR, MODEL_DIR, RESULT_DIR
 
 
 # Parse train only at the beginning in train_gnn.py
@@ -70,7 +70,7 @@ def overall_parser():
     parser.add_argument(
         "--pool", type=str, default="mean", help="pool strategy."
     )  # mean, max, add, att
-    
+
     # Loss type
     parser.add_argument(
         "--loss", type=str, default="MSE", help="Type of loss for training GNN."
@@ -84,7 +84,7 @@ def overall_parser():
 
     # Train test val split
     parser.add_argument(
-        "--test_set_size", type=float, default=0.2, help="test set size (ratio)"
+        "--test_set_fraction", type=float, default=0.2, help="test set size (ratio)"
     )
     parser.add_argument(
         "--val_set_size", type=float, default=0.1, help="validation set size (ratio)"
@@ -156,7 +156,7 @@ def overall_parser_rf():
 
     # Train test val split
     parser.add_argument(
-        "--test_set_size", type=float, default=0.2, help="test set size (ratio)"
+        "--test_set_fraction", type=float, default=0.2, help="test set size (ratio)"
     )
     parser.add_argument(
         "--val_set_size", type=float, default=0.1, help="validation set size (ratio)"

@@ -135,7 +135,6 @@ dmypy.json
 
 # Folder
 molucn/analysis
-molucn/utils/path.py
 data
 clutils
 configs

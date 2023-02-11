@@ -48,11 +48,9 @@ class GNN(torch.nn.Module):
 
         self.node_emb = Lin(self.num_node_features, self.hidden_dim)
         self.edge_emb = Lin(self.num_edge_features, self.hidden_dim)
-        self.relu_nn = ModuleList([ReLU() for i in range(self.num_layers)])
 
         self.convs = ModuleList()
         self.batch_norms = ModuleList()
-        self.relus = ModuleList()
 
         for i in range(self.num_layers):
             if conv_name == "nn":
@@ -65,7 +63,7 @@ class GNN(torch.nn.Module):
                 conv = GINEConv(
                     nn=Seq(
                         Lin(self.hidden_dim, 2 * self.hidden_dim),
-                        self.relu_nn[i],
+                        ReLU(),
                         Lin(2 * self.hidden_dim, self.hidden_dim),
                     )
                 )
@@ -82,7 +80,6 @@ class GNN(torch.nn.Module):
                 raise ValueError(f"Unknown convolutional layer {conv_name}")
             self.convs.append(conv)
             self.batch_norms.append(BatchNorm(self.hidden_dim))
-            self.relus.append(ReLU())
 
         self.lin1 = Lin(self.hidden_dim, self.num_classes)
 
@@ -119,7 +116,7 @@ class GNN(torch.nn.Module):
         """Returns the node embeddings just before the pooling layer."""
         x = self.node_emb(x)
         edge_attr = self.edge_emb(edge_attr)
-        for conv, batch_norm, ReLU in zip(self.convs, self.batch_norms, self.relus):
+        for conv, batch_norm in zip(self.convs, self.batch_norms):
             x = conv(x, edge_index, edge_attr)
             x = ReLU(batch_norm(x))
         node_x = x
@@ -160,7 +157,7 @@ class GNN(torch.nn.Module):
         edge_attr.retain_grad()
         acts.append((x, edge_attr))
 
-        for conv, batch_norm, ReLU in zip(self.convs, self.batch_norms, self.relus):
+        for conv, batch_norm in zip(self.convs, self.batch_norms):
             x = conv(x, edge_index, edge_attr)
             x = ReLU(batch_norm(x))
             x.retain_grad()

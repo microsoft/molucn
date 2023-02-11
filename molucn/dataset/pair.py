@@ -77,33 +77,36 @@ def create_heterodata(input: dict) -> HeteroData:
 
 
 def rebalance_pairs(
-    train_pairs: List[HeteroData], test_pairs: List[HeteroData], test_set_size=0.2
+    train_pairs: List[HeteroData], test_pairs: List[HeteroData], test_set_fraction=0.2
 ) -> Tuple[List[HeteroData], List[HeteroData]]:
     """Rebalances the pairs in the training and test sets to a 0.8/0.2 ratio.
 
     Args:
         train_pairs (List[HeteroData]): training pairs
         test_pairs (List[HeteroData]): testing pairs
-        test_set_size (float, optional): ratio of pairs in the test set. Defaults to 0.2.
+        test_set_fraction (float, optional): ratio of pairs in the test set. Defaults to 0.2.
     """
-    n = len(train_pairs) / (1 - test_set_size)
-    if len(test_pairs) > test_set_size * n:
-        test_pairs = test_pairs[: int(test_set_size * n)]
+    n = len(train_pairs) / (1 - test_set_fraction)
+    if len(test_pairs) > test_set_fraction * n:
+        test_pairs = test_pairs[: int(test_set_fraction * n)]
     else:
-        n = len(test_pairs) / test_set_size
-        train_pairs = train_pairs[: int(n * (1 - test_set_size))]
+        n = len(test_pairs) / test_set_fraction
+        train_pairs = train_pairs[: int(n * (1 - test_set_fraction))]
     return train_pairs, test_pairs
 
 
 def train_test_split_pairs(
-    pairs_list: List[HeteroData], ligands_list: List[str], test_set_size: float, seed=42
+    pairs_list: List[HeteroData],
+    ligands_list: List[str],
+    test_set_fraction: float,
+    seed=42,
 ) -> Tuple[List[HeteroData], List[HeteroData]]:
     """Split the ligands into training and test sets, construct training and test sets of pairs and rebalance them.
 
     Args:
         pairs_list (List[HeteroData]): list of pairs of ligands
         ligands_list (List[str]): list of the individual ligands present in the pairs
-        test_set_size (float): Ratio of pairs in the test set
+        test_set_fraction (float): Ratio of pairs in the test set
         seed (int, optional): Defaults to 42.
 
     Returns:
@@ -111,7 +114,7 @@ def train_test_split_pairs(
         List[HeteroData]: rebalanced test pairs
     """
     train_ligands, test_ligands = train_test_split(
-        ligands_list, random_state=seed, test_size=test_set_size
+        ligands_list, random_state=seed, test_size=test_set_fraction
     )
     train_pairs, test_pairs = [], []
     for pair in pairs_list:
@@ -123,7 +126,7 @@ def train_test_split_pairs(
             pair["data_i"].smiles in test_ligands
         ):
             test_pairs.append(pair)
-    return rebalance_pairs(train_pairs, test_pairs, test_set_size)
+    return rebalance_pairs(train_pairs, test_pairs, test_set_fraction)
 
 
 def create_ligands_list(pairs_list: List[HeteroData]) -> List[str]:
@@ -141,7 +144,7 @@ def create_ligands_list(pairs_list: List[HeteroData]) -> List[str]:
     return np.unique(ligands_list)
 
 
-def get_list_targets(data_ori_path="data/selected_processed_data"):
+def get_list_targets(data_ori_path: str = "data/selected_processed_data"):
     """Returns the list of targets present in the dataset.
 
     Args:
@@ -184,7 +187,10 @@ if __name__ == "__main__":
 
         ligands_list = create_ligands_list(pairs_list)
         train_pairs, test_pairs = train_test_split_pairs(
-            pairs_list, ligands_list, test_set_size=args.test_set_size, seed=args.seed
+            pairs_list,
+            ligands_list,
+            test_set_fraction=args.test_set_fraction,
+            seed=args.seed,
         )
 
         # Ligands in testing set are NOT in training set!

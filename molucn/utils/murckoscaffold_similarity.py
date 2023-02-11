@@ -92,8 +92,10 @@ def get_murckoscaffol_sim(n_targets: int, par_dir: str):
         target_path = os.path.join(par_dir, target, f'{target}_heterodata_list.pt')
         with open(target_path, "rb") as handle:
             pairs_list = dill.load(handle)
-        scaffolds = scaffold_to_smiles(get_unique_list_mol(pairs_list))
-        mol_sim[target] = len(scaffolds)
+        list_compounds = get_unique_list_mol(pairs_list)
+        scaffolds = scaffold_to_smiles(list_compounds)
+        print(f"Target: {target} - Number of scaffolds: {len(scaffolds)} - Number of compounds: {len(list_compounds)}")
+        mol_sim[target] = len(scaffolds) / len(list_compounds)
     return mol_sim
 
 if __name__ == "__main__":
@@ -103,5 +105,5 @@ if __name__ == "__main__":
     mol_sim = get_murckoscaffol_sim(n_targets, par_dir)
     print(mol_sim)
     df_mol_sim = pd.DataFrame({'target' : mol_sim.keys() , 'murcko_sim' : mol_sim.values() })
-    df_mol_sim.to_csv(os.path.join(save_dir, f'murcko_sim_{n_targets}.csv'))
+    df_mol_sim.to_csv(os.path.join(save_dir, f'murcko_sim_norm_{n_targets}.csv'))
     
