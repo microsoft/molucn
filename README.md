@@ -1,6 +1,6 @@
 # Introduction
 
-Supporting code and analyses for [A substructure-aware loss for feature attribution in drug discovery](https://chemrxiv.org/engage/chemrxiv/article-details/633a98bbea6a22542f06e149)
+Supporting code and analyses for [Explaining compound activity predictions with a substructure-aware loss for graph neural networks](https://chemrxiv.org/engage/chemrxiv/article-details/63cfabd3ae221a94e93b4b2d)
 
 # Getting Started
 
