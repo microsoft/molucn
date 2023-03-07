@@ -9,7 +9,7 @@ import torch.nn as nn
 from molucn.utils.utils import (
     get_common_nodes,
     get_substituents,
-) 
+)
 import os
 import os.path as osp
 import time
@@ -31,8 +31,7 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 MSE_LOSS_FN = nn.MSELoss()
 
 
-
-def get_num_cmn_sites(data_i, data_j):   
+def get_num_cmn_sites(data_i, data_j):
     idx_common_i, idx_common_j, map_i, map_j = get_common_nodes(
         data_i.mask.cpu(), data_j.mask.cpu()
     )
@@ -41,7 +40,8 @@ def get_num_cmn_sites(data_i, data_j):
     cmn_sites = np.unique(np.concatenate([as_i, as_j]))
     return len(cmn_sites)
 
-def get_scores_summary_by_pair(data_list, model, colors, args, type='test'):
+
+def get_scores_summary_by_pair(data_list, model, colors, args, type="test"):
 
     df = pd.DataFrame(
         columns=[
@@ -54,16 +54,17 @@ def get_scores_summary_by_pair(data_list, model, colors, args, type='test'):
             "gdir",
         ]
     )
-    
+
     for k, hetero_data in enumerate(data_list):
-        data_i, data_j = hetero_data["data_i"].to(DEVICE), hetero_data["data_j"].to(DEVICE)
-        out_i, out_j = model(data_i).squeeze().unsqueeze(0).detach(), model(data_j).squeeze().unsqueeze(0).detach()
-        rmse_i = torch.sqrt(
-            MSE_LOSS_FN(out_i, data_i.y)
-        ).item()
-        rmse_j = torch.sqrt(
-            MSE_LOSS_FN(out_j, data_j.y)
-        ).item()
+        data_i, data_j = hetero_data["data_i"].to(DEVICE), hetero_data["data_j"].to(
+            DEVICE
+        )
+        out_i, out_j = (
+            model(data_i).squeeze().unsqueeze(0).detach(),
+            model(data_j).squeeze().unsqueeze(0).detach(),
+        )
+        rmse_i = torch.sqrt(MSE_LOSS_FN(out_i, data_i.y)).item()
+        rmse_j = torch.sqrt(MSE_LOSS_FN(out_j, data_j.y)).item()
         rmse = (rmse_i + rmse_j) / 2
 
         color_pred_i, color_pred_j = colors[k]
@@ -88,10 +89,11 @@ def get_scores_summary_by_pair(data_list, model, colors, args, type='test'):
             "explainer": args.explainer,
             "rmse": rmse,
             "gdir": acc,
-            }
+        }
         df = df.append(row, ignore_index=True)
 
     return df
+
 
 def main_by_pair(args):
     set_seed(args.seed)
@@ -167,8 +169,12 @@ def main_by_pair(args):
         dill.dump(test_colors, handle)
 
     ##### Summary #####
-    test_summary = get_scores_summary_by_pair(test_dataset, model, test_colors, args, type='test')
-    train_summary = get_scores_summary_by_pair(trainval_dataset, model, train_colors, args, type='train')
+    test_summary = get_scores_summary_by_pair(
+        test_dataset, model, test_colors, args, type="test"
+    )
+    train_summary = get_scores_summary_by_pair(
+        trainval_dataset, model, train_colors, args, type="train"
+    )
 
     os.makedirs(args.result_path, exist_ok=True)
     global_res_path = osp.join(
@@ -183,8 +189,5 @@ def main_by_pair(args):
 if __name__ == "__main__":
     parser = overall_parser()
     args = parser.parse_args()
-    args.loss = 'MSE+UCN'
+    args.loss = "MSE+UCN"
     main_by_pair(args)
-
-
-

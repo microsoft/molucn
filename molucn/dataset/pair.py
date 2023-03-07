@@ -233,3 +233,4 @@ if __name__ == "__main__":
                 handle.write(f"Number of pairs after train/test split: {n_pairs}\n")
                 handle.write(f"Size of training set: {n_pairs_train}\n")
                 handle.write(f"Size of testing set: {n_pairs_test}\n")
+

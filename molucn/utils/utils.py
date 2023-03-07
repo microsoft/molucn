@@ -17,6 +17,21 @@ def get_mcs(pairs_list: List[HeteroData]) -> np.ndarray:
     return np.array(MCS)
 
 
+def get_colors(pairs_list, explainer):
+    colors = []
+    for hetero_data in pairs_list:
+        data_i, data_j = hetero_data["data_i"], hetero_data["data_j"]
+        data_i.batch, data_j.batch = torch.zeros(
+            data_i.x.size(0), dtype=torch.int64
+        ), torch.zeros(data_j.x.size(0), dtype=torch.int64)
+        color_pred_i, color_pred_j = (
+            explainer.explain_graph(data_i),
+            explainer.explain_graph(data_j),
+        )
+        colors.append([color_pred_i, color_pred_j])
+    return colors
+
+
 def make_dir(path: str):
     if not os.path.exists(path):
         os.mkdir(path)

@@ -21,76 +21,61 @@ from molucn.feat_attribution.gradinput import GradInput
 from molucn.feat_attribution.ig import IntegratedGradient
 from molucn.feat_attribution.graphsvx import GraphSVX
 from molucn.gnn.model import GNN
-from molucn.utils.parser_utils import overall_parser
 from molucn.utils.train_utils import DEVICE, test_epoch, train_epoch
-from molucn.utils.utils import get_colors, get_mcs, set_seed
+from molucn.utils.utils import get_mcs, set_seed, get_colors
 
 
-def main(args):
-    set_seed(args.seed)
-    train_params = (
-        f"{args.conv}_{args.loss}_{args.pool}_{args.lambda1}_{args.explainer}"
-    )
-
+def test_gradinput_MSE():
+    seed = 1337
+    set_seed(seed)
     ##### Data loading and pre-processing #####
-    print(args.data_path)
-
     # Check that data exists
-    file_train = osp.join(
-        args.data_path, f"{args.target}/{args.target}_seed_{args.seed}_train.pt"
-    )
-    file_test = osp.join(
-        args.data_path, f"{args.target}/{args.target}_seed_{args.seed}_test.pt"
-    )
-
-    if not osp.exists(file_train) or not osp.exists(file_test):
-        raise FileNotFoundError(
-            "Data not found. Please try to - choose another protein target or - run code/pair.py with a new seed."
-        )
-
+    file_train = osp.join("data/1D3G-BRE/1D3G-BRE_seed_1337_train.pt")
+    file_test = osp.join("data/1D3G-BRE/1D3G-BRE_seed_1337_test.pt")
+    assert osp.exists(file_train)
+    assert osp.exists(file_test)
     with open(file_train, "rb") as handle:
         trainval_dataset = dill.load(handle)
-
     with open(file_test, "rb") as handle:
         test_dataset = dill.load(handle)
 
     # Ligands in testing set are NOT in training set!
-
     train_dataset, val_dataset = train_test_split(
-        trainval_dataset, random_state=args.seed, test_size=args.val_set_size
+        trainval_dataset, random_state=seed, test_size=0.1
     )
-
     test_loader = DataLoader(
         test_dataset,
         batch_size=len(test_dataset),
         shuffle=False,
-        num_workers=args.num_workers,  # num_workers can go into args
+        num_workers=0,  # num_workers can go into args
     )
     val_loader = DataLoader(
         val_dataset,
         batch_size=len(val_dataset),
         shuffle=False,
-        num_workers=args.num_workers,
+        num_workers=0,
     )
     train_loader = DataLoader(
         train_dataset,
-        batch_size=args.batch_size,
+        batch_size=16,
         shuffle=True,
-        num_workers=args.num_workers,
+        num_workers=0,
     )
-    num_node_features, num_edge_features = get_num_features(train_dataset[0])
 
+    num_node_features, num_edge_features = get_num_features(train_dataset[0])
+    assert num_node_features == 50
+    assert num_edge_features == 10
     ##### GNN training #####
     model = GNN(
         num_node_features,
         num_edge_features,
-        hidden_dim=args.hidden_dim,
-        num_layers=args.num_layers,
-        conv_name=args.conv,
-        pool=args.pool,
+        hidden_dim=16,
+        num_layers=3,
+        conv_name="nn",
+        pool="mean",
     ).to(DEVICE)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.005)
     scheduler = ReduceLROnPlateau(
         optimizer, mode="min", factor=0.8, patience=10, min_lr=1e-4
     )
@@ -101,7 +86,7 @@ def main(args):
     patience = 4
     trigger_times = 0
 
-    for epoch in range(1, args.epoch + 1):
+    for epoch in range(1, 200 + 1):
 
         t1 = time.time()
         lr = scheduler.optimizer.param_groups[0]["lr"]
@@ -110,8 +95,8 @@ def main(args):
             train_loader,
             model,
             optimizer,
-            loss_type=args.loss,
-            lambda1=args.lambda1,
+            loss_type="MSE",
+            lambda1=1.0,
         )
 
         rmse_val, pcc_val = test_epoch(val_loader, model)
@@ -123,7 +108,7 @@ def main(args):
         rmse_test, pcc_test = test_epoch(test_loader, model)
         t3 = time.time()
 
-        if epoch % args.verbose == 0:
+        if epoch % 10 == 0:
             print(
                 "Epoch{:4d}[{:.3f}s]: LR: {:.5f}, Loss: {:.5f}, Test Loss: {:.5f}, Test PCC: {:.5f}".format(
                     epoch, t3 - t1, lr, loss, rmse_test, pcc_test
@@ -156,84 +141,18 @@ def main(args):
 
     print("Final test rmse: {:.4f}".format(rmse_test))
     print("Final test pcc: {:.4f}".format(pcc_test))
-
-    # Save GNN scores
-    os.makedirs(args.log_path, exist_ok=True)
-    global_res_path = osp.join(
-        args.log_path, f"model_scores_gnn_{train_params}_{args.target}.csv"
-    )
-    df = pd.DataFrame(
-        [
-            [
-                args.target,
-                args.seed,
-                args.conv,
-                args.pool,
-                args.loss,
-                args.lambda1,
-                args.explainer,
-                rmse_test,
-                pcc_test,
-            ]
-        ],
-        columns=[
-            "target",
-            "seed",
-            "conv",
-            "pool",
-            "loss",
-            "lambda1",
-            "explainer",
-            "rmse_test",
-            "pcc_test",
-        ],
-    )
-    df.to_csv(global_res_path, index=False)
+    assert rmse_test < 0.4
+    assert pcc_test > 0.985
 
     ##### Feature Attribution #####
     model.eval()
-
-    if args.explainer == "gradinput":
-        explainer = GradInput(DEVICE, model)
-    elif args.explainer == "ig":
-        explainer = IntegratedGradient(DEVICE, model)
-    elif args.explainer == "cam":
-        explainer = CAM(DEVICE, model)
-    elif args.explainer == "gradcam":
-        explainer = GradCAM(DEVICE, model)
-    elif args.explainer == "diff":
-        explainer = Diff(DEVICE, model)
-    elif args.explainer == "graphsvx":
-        explainer = GraphSVX(DEVICE, model)
+    explainer = GradInput(DEVICE, model)
 
     t0 = time.time()
     train_colors = get_colors(trainval_dataset, explainer)
     time_explainer = (time.time() - t0) / len(trainval_dataset)
     print("Average time to generate 1 explanation: ", time_explainer)
     test_colors = get_colors(test_dataset, explainer)
-
-    # Save colors
-    os.makedirs(osp.join(args.color_path, args.explainer, args.target), exist_ok=True)
-    with open(
-        osp.join(
-            args.color_path,
-            args.explainer,
-            args.target,
-            f"{args.target}_seed_{args.seed}_{train_params}_train.pt",
-        ),
-        "wb",
-    ) as handle:
-        dill.dump(train_colors, handle)
-    with open(
-        osp.join(
-            args.color_path,
-            args.explainer,
-            args.target,
-            f"{args.target}_seed_{args.seed}_{train_params}_test.pt",
-        ),
-        "wb",
-    ) as handle:
-        dill.dump(test_colors, handle)
 
     accs_train, f1s_train = get_scores(trainval_dataset, train_colors, set="train")
     accs_test, f1s_test = get_scores(test_dataset, test_colors, set="test")
@@ -245,11 +164,6 @@ def main(args):
 
     local_dir_train = get_local_directions(trainval_dataset, train_colors, set="train")
     local_dir_test = get_local_directions(test_dataset, test_colors, set="test")
-
-    os.makedirs(args.result_path, exist_ok=True)
-    global_res_path = osp.join(
-        args.result_path, f"attr_scores_{train_params}_{args.target}.csv"
-    )
 
     accs_train, f1s_train = (
         np.nanmean(accs_train, axis=0).tolist(),
@@ -271,37 +185,18 @@ def main(args):
         np.sum(get_mcs(trainval_dataset), axis=0).tolist(),
         np.sum(get_mcs(test_dataset), axis=0).tolist(),
     )
+    print("Train Accuracy: ", accs_train)
+    print("Test Accuracy: ", accs_test)
+    print("Train F1: ", f1s_train)
+    print("Test F1: ", f1s_test)
+    print("Train Global Directions: ", global_dir_train)
+    print("Test Global Directions: ", global_dir_test)
+    print("Train Local Directions: ", local_dir_train)
+    print("Test Local Directions: ", local_dir_test)
+    assert np.max(accs_train) > 0.5
+    assert np.max(accs_test) > 0.6
+    assert np.max(f1s_train) > 0.4
+    assert np.max(f1s_test) > 0.5
+    assert np.max(global_dir_train) > 0.77
+    assert np.max(global_dir_test) > 0.85
 
-    res_dict = {
-        "target": [args.target] * 10,
-        "seed": [args.seed] * 10,
-        "conv": [args.conv] * 10,
-        "pool": [args.pool] * 10,
-        "loss": [args.loss] * 10,
-        "lambda1": [args.lambda1] * 10,
-        "explainer": [args.explainer] * 10,
-        "time": [round(time_explainer, 4)] * 10,
-        "acc_train": accs_train,
-        "acc_test": accs_test,
-        "f1_train": f1s_train,
-        "f1_test": f1s_test,
-        "global_dir_train": global_dir_train,
-        "global_dir_test": global_dir_test,
-        "local_dir_train": local_dir_train,
-        "local_dir_test": local_dir_test,
-        "mcs": [50, 55, 60, 65, 70, 75, 80, 85, 90, 95],
-        "n_mcs_train": n_mcs_train,
-        "n_mcs_test": n_mcs_test,
-    }
-    df = pd.DataFrame({key: pd.Series(value) for key, value in res_dict.items()})
-    df.to_csv(global_res_path, index=False)
-
-
-if __name__ == "__main__":
-
-    parser = overall_parser()
-    args = parser.parse_args()
-
-    for loss in ["MSE", "MSE+AC", "MSE+UCN"]:
-        args.loss = loss
-        main(args)

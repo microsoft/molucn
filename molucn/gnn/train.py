@@ -27,17 +27,16 @@ log_dir = "/cluster/work/zhang/kamara/molucn/gridsearch"
 def train_gnn(args, save_model=True, track_wandb=False):
     """Train the GNN model and save the logs (rmse, pcc scores) and the model"""
 
-    # note that we define values from `wandb.config` instead 
+    # note that we define values from `wandb.config` instead
     # of defining hard values
-    #args.lr  =  wandb.config.lr
-    #args.batch_size = wandb.config.batch_size
-    #args.epoch = wandb.config.epoch
+    # args.lr  =  wandb.config.lr
+    # args.batch_size = wandb.config.batch_size
+    # args.epoch = wandb.config.epoch
 
     set_seed(args.seed)
     train_params = (
         f"{args.conv}_{args.loss}_{args.pool}_{args.lambda1}_{args.explainer}"
     )
-
 
     # Check that data exists
     file_train = osp.join(
@@ -66,7 +65,6 @@ def train_gnn(args, save_model=True, track_wandb=False):
         trainval_dataset, random_state=args.seed, test_size=args.val_set_size
     )
     # Ligands in validation set might also be in training set!
-
 
     test_loader = DataLoader(
         test_dataset,
@@ -144,12 +142,14 @@ def train_gnn(args, save_model=True, track_wandb=False):
         )
 
         if track_wandb:
-            wandb.log({
-                'epoch': epoch, 
-                'rmse_train': loss,
-                'rmse_val': rmse_val,
-                'rmse_test': rmse_test
-            })
+            wandb.log(
+                {
+                    "epoch": epoch,
+                    "rmse_train": loss,
+                    "rmse_val": rmse_val,
+                    "rmse_test": rmse_test,
+                }
+            )
 
         # Early stopping
         if epoch > 100:
@@ -172,6 +172,7 @@ def train_gnn(args, save_model=True, track_wandb=False):
     print("Final test pcc: {:.4f}".format(pcc_test))
 
     return model, rmse_test, pcc_test
+
 
 def save_gnn_scores(args, rmse_test, pcc_test):
 
@@ -217,6 +218,7 @@ def save_gnn_scores(args, rmse_test, pcc_test):
     )
     # df.to_csv(global_res_path, index=False)
 
+
 def save_gnn_model(args, model):
 
     train_params = (
@@ -241,6 +243,7 @@ def save_gnn_model(args, model):
         torch.save(model.state_dict(), model_file)
         print("Model saved!\n")
 
+
 def main(save_model=False):
     model, rmse_test, pcc_test = train_gnn(args)
     save_gnn_scores(args, rmse_test, pcc_test)
@@ -249,7 +252,6 @@ def main(save_model=False):
 
 
 if __name__ == "__main__":
-
 
     """
     parser = overall_parser()
@@ -265,7 +267,7 @@ if __name__ == "__main__":
             'method': 'random',
             'name': 'sweep',
             'metric': {'goal': 'minimize', 'name': 'rmse_test'},
-            'parameters': 
+            'parameters':
             {
                 'batch_size': {'values': [16, 32, 64]},
                 'epoch': {'values': [100, 200, 300]},
@@ -281,14 +283,13 @@ if __name__ == "__main__":
         wandb.agent(sweep_id, function=main, count=10)
     """
 
-
     parser = overall_parser()
     args = parser.parse_args()
 
     for target in ["1DYR-TOP", "1F0R-815"]:
         args.target = target
 
-        project_name = 'gridsearch_arch_for_{}'.format(args.target)
+        project_name = "gridsearch_arch_for_{}".format(args.target)
 
         for loss in ["MSE+UCN"]:
             for batch_size in [16]:
@@ -302,7 +303,9 @@ if __name__ == "__main__":
                             args.lr = lr
                             args.epoch = 300
 
-                            run_name = 'search_for_{}_{}_{}_{}_{}'.format(args.target, args.loss, num_layers, hidden_dim, lr)
+                            run_name = "search_for_{}_{}_{}_{}_{}".format(
+                                args.target, args.loss, num_layers, hidden_dim, lr
+                            )
 
                             run = wandb.init(project=project_name, name=run_name)
                             train_gnn(args, save_model=False, track_wandb=True)

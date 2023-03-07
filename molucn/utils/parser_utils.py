@@ -1,6 +1,6 @@
 import argparse
 
-from molucn.path import COLOR_DIR, DATA_DIR, LOG_DIR, MODEL_DIR, RESULT_DIR
+from molucn.path import COLOR_PATH, DATA_PATH, LOG_PATH, MODEL_PATH, RESULT_PATH
 
 
 # Parse train only at the beginning in train_gnn.py
@@ -21,31 +21,31 @@ def overall_parser():
 
     # Saving paths
     parser.add_argument(
-        "--data_path", nargs="?", default=DATA_DIR, help="Input data path."
+        "--data_path", nargs="?", default=DATA_PATH, help="Input data path."
     )
     parser.add_argument(
         "--model_path",
         nargs="?",
-        default=MODEL_DIR,
+        default=MODEL_PATH,
         help="path for saving trained model.",
     )
     parser.add_argument(
         "--log_path",
         nargs="?",
-        default=LOG_DIR,
+        default=LOG_PATH,
         help="path for saving gnn scores (rmse, pcc).",
     )
     parser.add_argument(
         "-color_path",
         nargs="?",
-        default=COLOR_DIR,
+        default=COLOR_PATH,
         help="path for saving node colors.",
     )
 
     parser.add_argument(
         "--result_path",
         nargs="?",
-        default=RESULT_DIR,
+        default=RESULT_PATH,
         help="path for saving the feature attribution scores (accs, f1s).",
     )
 
@@ -121,31 +121,31 @@ def overall_parser_rf():
 
     # Saving paths
     parser.add_argument(
-        "--data_path", nargs="?", default=DATA_DIR, help="Input data path."
+        "--data_path", nargs="?", default=DATA_PATH, help="Input data path."
     )
     parser.add_argument(
         "--model_path",
         nargs="?",
-        default=MODEL_DIR,
+        default=MODEL_PATH,
         help="path for saving trained model.",
     )
     parser.add_argument(
         "--log_path",
         nargs="?",
-        default=LOG_DIR,
+        default=LOG_PATH,
         help="path for saving gnn scores (rmse, pcc).",
     )
     parser.add_argument(
         "-color_path",
         nargs="?",
-        default=COLOR_DIR,
+        default=COLOR_PATH,
         help="path for saving node colors.",
     )
 
     parser.add_argument(
         "--result_path",
         nargs="?",
-        default=RESULT_DIR,
+        default=RESULT_PATH,
         help="path for saving the feature attribution scores (accs, f1s).",
     )
 
