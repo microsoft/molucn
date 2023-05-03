@@ -18,7 +18,7 @@ conda activate molucn
 To reproduce the results presented in the paper, download the following compressed data tarball from [here](https://figshare.com/articles/dataset/molucn-data/21215477) (~26GB, when uncompressed):
 
 ```bash
-wget -O data.tar.gz "https://figshare.com/articles/dataset/molucn-data/21215477?file=37624043"
+wget -O data.tar.gz https://figshare.com/ndownloader/files/37624043
 tar -xf data.tar.gz
 ```
 
@@ -54,13 +54,13 @@ The trained GNN models and their logs (metrics) will be saved under `models/` an
 To train the GNN model and run a feature attribution for one target protein (e.g., 1D3G-BRE) run:
 
 ```bash
-python molucn/main.py --target 1D3G-BRE --method [diff, gradinput, ig, cam, gradcam]
+python molucn/main.py --target "1D3G-BRE" --explainer {"diff" | "gradinput" | "ig" | "cam" | "gradcam"}
 ```
 
 For the random forest and masking baseline:
 
 ```bash
-python molucn/main_rf.py --target 1D3G-BRE
+python molucn/main_rf.py --target "1D3G-BRE"
 ```
 
 ## Test on all 350 protein targets
